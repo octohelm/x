@@ -5,6 +5,14 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 
 
+# [0.0.2](https://github.com/go-courier/x/compare/v0.0.1...v0.0.2)
+
+### Bug Fixes
+
+* **fix(reflect):** enhance New ([a8e1ed3](https://github.com/go-courier/x/commit/a8e1ed328414e95f42ec6b829ad018ba26aac790))
+
+
+
 # [0.0.1](https://github.com/go-courier/x/compare/v0.0.0...v0.0.1)
 
 ### Bug Fixes
