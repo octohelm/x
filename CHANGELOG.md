@@ -5,6 +5,14 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 
 
+# [0.0.3](https://github.com/go-courier/x/compare/v0.0.2...v0.0.3)
+
+### Bug Fixes
+
+* **fix(encoding):** Unmarshal should initial nil value correctly ([ad108f6](https://github.com/go-courier/x/commit/ad108f6116d83c40aa65b3f623f654c9d330bcb2))
+
+
+
 # [0.0.2](https://github.com/go-courier/x/compare/v0.0.1...v0.0.2)
 
 ### Bug Fixes
