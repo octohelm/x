@@ -5,6 +5,14 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 
 
+# [0.0.1](https://github.com/go-courier/x/compare/v0.0.0...v0.0.1)
+
+### Bug Fixes
+
+* **fix(encoding):** unmarshal text for multi ptr value ([77260a8](https://github.com/go-courier/x/commit/77260a8d44d760c1cd457878d573fed861c8d58d))
+
+
+
 # 0.0.0
 
 ### Features
