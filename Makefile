@@ -1,0 +1,11 @@
+fmt:
+	goimports -w -l .
+
+test:
+	go test -v -race ./...
+
+test.bench:
+	go test -test.bench=. -test.benchmem ./...
+
+cover:
+	go test -v -race -coverprofile=coverage.txt -covermode=atomic ./...
