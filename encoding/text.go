@@ -219,7 +219,7 @@ func unmarshalTextToReflectValue(rv reflect.Value, data []byte) error {
 
 	for rv.Kind() == reflect.Ptr {
 		if rv.IsNil() {
-			rv.Set(reflect.New(rv.Type()).Elem())
+			rv.Set(reflectx.New(rv.Type()))
 		}
 		rv = rv.Elem()
 	}
