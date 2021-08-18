@@ -34,20 +34,23 @@ func BenchmarkNew(b *testing.B) {
 func TestNew(t *testing.T) {
 	t.Run("NewType", func(t *testing.T) {
 		tpe := reflect.TypeOf(Zero(""))
-		_, ok := New(tpe).Interface().(Zero)
+		z, ok := New(tpe).Interface().(Zero)
 		NewWithT(t).Expect(ok).To(BeTrue())
+		NewWithT(t).Expect(z).To(Equal(Zero("")))
 	})
 
 	t.Run("NewPtrType", func(t *testing.T) {
 		tpe := reflect.PtrTo(reflect.TypeOf(Zero("")))
-		_, ok := New(tpe).Interface().(*Zero)
+		z, ok := New(tpe).Interface().(*Zero)
 		NewWithT(t).Expect(ok).To(BeTrue())
+		NewWithT(t).Expect(*z).To(Equal(Zero("")))
 	})
 
 	t.Run("NewPtrPtrType", func(t *testing.T) {
 		tpe := reflect.PtrTo(reflect.PtrTo(reflect.TypeOf(Zero(""))))
-		_, ok := New(tpe).Interface().(**Zero)
+		z, ok := New(tpe).Interface().(**Zero)
 		NewWithT(t).Expect(ok).To(BeTrue())
+		NewWithT(t).Expect(**z).To(Equal(Zero("")))
 	})
 }
 

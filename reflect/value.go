@@ -7,12 +7,25 @@ import (
 // New return TypeValue
 // not like reflect.New, which return PtrTo(reflect.Type),
 func New(tpe reflect.Type) reflect.Value {
-	rv := reflect.New(tpe).Elem()
-	if tpe.Kind() == reflect.Ptr {
-		rv.Set(New(tpe.Elem()).Addr())
+	ptrLevel := 0
+	for tpe.Kind() == reflect.Ptr {
+		tpe = tpe.Elem()
+		ptrLevel++
+	}
+
+	rv := reflect.New(tpe)
+
+	if ptrLevel > 0 {
+		for i := 0; i < ptrLevel-1; i++ {
+			tpe = reflect.PtrTo(tpe)
+			nextRv := reflect.New(tpe)
+			nextRv.Elem().Set(rv)
+			rv = nextRv
+		}
 		return rv
 	}
-	return rv
+
+	return rv.Elem()
 }
 
 func Indirect(rv reflect.Value) reflect.Value {

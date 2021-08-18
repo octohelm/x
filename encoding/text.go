@@ -97,17 +97,18 @@ func UnmarshalText(v interface{}, data []byte) error {
 		if rv.Kind() != reflect.Ptr {
 			rv = rv.Addr()
 		} else {
-			// NewPtrTo ptr value
 			if rv.IsNil() {
 				rv.Set(reflectx.New(rv.Type()))
 			}
 		}
 
-		if textUnmarshaler, ok := rv.Interface().(encoding.TextUnmarshaler); ok {
-			if err := textUnmarshaler.UnmarshalText(data); err != nil {
-				return pkgerrors.Wrapf(err, "unmarshal text to %T failed", v)
+		if rv.CanInterface() {
+			if textUnmarshaler, ok := rv.Interface().(encoding.TextUnmarshaler); ok {
+				if err := textUnmarshaler.UnmarshalText(data); err != nil {
+					return pkgerrors.Wrapf(err, "unmarshal text to %T failed", v)
+				}
+				return nil
 			}
-			return nil
 		}
 
 		return unmarshalTextToReflectValue(rv, data)
@@ -216,12 +217,10 @@ func unmarshalTextToReflectValue(rv reflect.Value, data []byte) error {
 		return pkgerrors.Errorf("unmarshal text need ptr value, but got %#v", rv.Interface())
 	}
 
-	// NewPtrTo ptr value
-	if rv.IsNil() {
-		rv.Set(reflectx.New(rv.Type()))
-	}
-
 	for rv.Kind() == reflect.Ptr {
+		if rv.IsNil() {
+			rv.Set(reflect.New(rv.Type()).Elem())
+		}
 		rv = rv.Elem()
 	}
 
