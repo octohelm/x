@@ -31,20 +31,21 @@ type NamedInt int
 
 var (
 	v = struct {
-		NamedString NamedString
-		NamedInt    NamedInt
-		Duration    Duration
-		PtrDuration *Duration
-		String      string
-		PtrString   *string
-		Int         int
-		PtrInt      *int
-		Uint        uint
-		PtrUint     *uint
-		Float       float32
-		PtrFloat    *float32
-		Bool        bool
-		PtrBool     *bool
+		NamedString  NamedString
+		NamedInt     NamedInt
+		Duration     Duration
+		PtrDuration  *Duration
+		String       string
+		PtrString    *string
+		PtrPtrString **string
+		Int          int
+		PtrInt       *int
+		Uint         uint
+		PtrUint      *uint
+		Float        float32
+		PtrFloat     *float32
+		Bool         bool
+		PtrBool      *bool
 	}{}
 
 	rv = reflect.ValueOf(&v).Elem()
@@ -62,6 +63,15 @@ var cases = []struct {
 		rv.FieldByName("PtrString"),
 		"string",
 		ptr.String("string"),
+	},
+	{
+		"Ptr Ptr String",
+		rv.FieldByName("PtrPtrString"),
+		"string",
+		func() **string {
+			s := ptr.String("string")
+			return &s
+		}(),
 	},
 	{
 		"Ptr String raw value",
