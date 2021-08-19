@@ -74,6 +74,10 @@ func MarshalText(v interface{}) ([]byte, error) {
 		}
 
 		switch rv.Kind() {
+		case reflect.Slice:
+			if rv.Type().Elem().Kind() == reflect.Uint8 {
+				return rv.Bytes(), nil
+			}
 		case reflect.String:
 			return []byte(rv.String()), nil
 		case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
@@ -126,6 +130,10 @@ func UnmarshalText(v interface{}, data []byte) error {
 	}
 
 	switch x := v.(type) {
+	case *[]byte:
+		d := make([]byte, len(data))
+		copy(d, data)
+		*x = d
 	case *string:
 		*x = string(data)
 	case *bool:
@@ -225,6 +233,10 @@ func unmarshalTextToReflectValue(rv reflect.Value, data []byte) error {
 	}
 
 	switch rv.Kind() {
+	case reflect.Slice:
+		if rv.Type().Elem().Kind() == reflect.Uint8 {
+			rv.SetBytes(data)
+		}
 	case reflect.String:
 		rv.SetString(string(data))
 	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:

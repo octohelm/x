@@ -46,6 +46,7 @@ var (
 		PtrFloat     *float32
 		Bool         bool
 		PtrBool      *bool
+		Bytes        []byte
 	}{}
 
 	rv = reflect.ValueOf(&v).Elem()
@@ -156,6 +157,21 @@ var cases = []struct {
 		rv.FieldByName("PtrBool"),
 		"true",
 		ptr.Bool(true),
+	},
+	{
+		"Bytes",
+		rv.FieldByName("Bytes"),
+		"111",
+		[]byte("111"),
+	},
+	{
+		"Bytes direct",
+		&v.Bytes,
+		"111",
+		func() *[]byte {
+			b := []byte("111")
+			return &b
+		}(),
 	},
 }
 
