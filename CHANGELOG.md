@@ -5,6 +5,14 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 
 
+# [0.0.4](https://github.com/go-courier/x/compare/v0.0.3...v0.0.4)
+
+### Bug Fixes
+
+* **fix(encoding):** should handle bytes ([129e669](https://github.com/go-courier/x/commit/129e669225863a5516b0a7cb0d7de8247bf5014c))
+
+
+
 # [0.0.3](https://github.com/go-courier/x/compare/v0.0.2...v0.0.3)
 
 ### Bug Fixes
