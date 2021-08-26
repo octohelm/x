@@ -1,16 +1,20 @@
 package types
 
 import (
-	"bytes"
 	"encoding"
 	"go/ast"
 	"go/types"
 	"reflect"
 	"strings"
+
+	reflectx "github.com/go-courier/x/reflect"
 )
 
 // interface like reflect.Type but only for data type
 type Type interface {
+	// Unwrap return reflect.Type or types.Type
+	Unwrap() interface{}
+
 	Name() string
 	PkgPath() string
 	String() string
@@ -56,7 +60,7 @@ type StructField interface {
 func TryNew(u Type) (reflect.Value, bool) {
 	switch t := u.(type) {
 	case *RType:
-		return reflect.New(t.Type), true
+		return reflectx.New(t.Type), true
 	}
 	return reflect.Value{}, false
 }
@@ -125,7 +129,7 @@ func Deref(typ Type) Type {
 }
 
 func FullTypeName(typ Type) string {
-	buf := bytes.NewBuffer(nil)
+	buf := &strings.Builder{}
 
 	for typ.Kind() == reflect.Ptr {
 		buf.WriteByte('*')

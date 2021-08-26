@@ -5,13 +5,15 @@ import (
 )
 
 func FromRType(rtype reflect.Type) *RType {
-	return &RType{
-		Type: rtype,
-	}
+	return &RType{Type: rtype}
 }
 
 type RType struct {
 	reflect.Type
+}
+
+func (rtype *RType) Unwrap() interface{} {
+	return rtype.Type
 }
 
 func (rtype *RType) Method(i int) Method {
