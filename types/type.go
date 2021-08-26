@@ -118,8 +118,8 @@ func EachField(typ Type, tagForName string, each func(field StructField, fieldDi
 }
 
 func Deref(typ Type) Type {
-	if typ.Kind() == reflect.Ptr {
-		return Deref(typ.Elem())
+	for typ.Kind() == reflect.Ptr {
+		typ = typ.Elem()
 	}
 	return typ
 }
