@@ -5,6 +5,14 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 
 
+# [0.0.5](https://github.com/go-courier/x/compare/v0.0.4...v0.0.5)
+
+### Bug Fixes
+
+* **fix(reflect):** loop over call stack ([abab321](https://github.com/go-courier/x/commit/abab3215ac091e407b654a2b00f6a0ca78c39415))
+
+
+
 # [0.0.4](https://github.com/go-courier/x/compare/v0.0.3...v0.0.4)
 
 ### Bug Fixes
