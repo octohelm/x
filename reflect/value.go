@@ -29,8 +29,8 @@ func New(tpe reflect.Type) reflect.Value {
 }
 
 func Indirect(rv reflect.Value) reflect.Value {
-	if rv.Kind() == reflect.Ptr {
-		return Indirect(rv.Elem())
+	for rv.Kind() == reflect.Ptr {
+		rv = rv.Elem()
 	}
 	return rv
 }

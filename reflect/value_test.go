@@ -31,6 +31,14 @@ func BenchmarkNew(b *testing.B) {
 	}
 }
 
+func BenchmarkIndirect(b *testing.B) {
+	x := New(reflect.PtrTo(reflect.TypeOf(Zero(""))))
+
+	for i := 0; i < b.N; i++ {
+		_ = Indirect(x)
+	}
+}
+
 func TestNew(t *testing.T) {
 	t.Run("NewType", func(t *testing.T) {
 		tpe := reflect.TypeOf(Zero(""))
