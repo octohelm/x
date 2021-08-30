@@ -5,6 +5,16 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 
 
+# [0.0.6](https://github.com/go-courier/x/compare/v0.0.5...v0.0.6)
+
+### Bug Fixes
+
+* **fix(types):** cleanup ([4631ad7](https://github.com/go-courier/x/commit/4631ad7f597b39c253c37054586ff8110c96c801))
+* **fix(types):** loop over call stack ([cab5014](https://github.com/go-courier/x/commit/cab501487ce532ffda18d6d38ec4c163a199ecd2))
+* **fix(reflect):** could process StructTag ([3208f9e](https://github.com/go-courier/x/commit/3208f9e05becc08ca20970c890e990e299cae814))
+
+
+
 # [0.0.5](https://github.com/go-courier/x/compare/v0.0.4...v0.0.5)
 
 ### Bug Fixes
