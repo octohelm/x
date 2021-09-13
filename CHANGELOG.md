@@ -5,6 +5,14 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 
 
+# [0.0.9](https://github.com/go-courier/x/compare/v0.0.8...v0.0.9)
+
+### Bug Fixes
+
+* **fix(types):** better Implements ([15c306a](https://github.com/go-courier/x/commit/15c306a02638a659355c1e1c04646b72c175903a))
+
+
+
 # [0.0.8](https://github.com/go-courier/x/compare/v0.0.7...v0.0.8)
 
 ### Bug Fixes
