@@ -74,8 +74,7 @@ func EncodingTextMarshalerTypeReplacer(u Type) (Type, bool) {
 	case *RType:
 		return FromRType(reflect.TypeOf("")), t.Implements(rtypeEncodingTextMarshaler)
 	case *TType:
-		ttypeEncodingTextMarshaler := FromTType(TypeByName("encoding", "TextMarshaler").Underlying())
-		return FromTType(types.Typ[types.String]), t.Implements(ttypeEncodingTextMarshaler)
+		return FromTType(types.Typ[types.String]), t.Implements(rtypeEncodingTextMarshaler)
 	}
 	return nil, false
 }

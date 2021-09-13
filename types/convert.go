@@ -1,11 +1,11 @@
 package types
 
 import (
-	"go/importer"
-	"go/token"
 	"go/types"
 	"reflect"
 	"sync"
+
+	"golang.org/x/tools/go/packages"
 )
 
 var (
@@ -13,24 +13,56 @@ var (
 	pkgCache   = sync.Map{}
 )
 
+const (
+	LoadFiles   = packages.NeedName | packages.NeedFiles | packages.NeedCompiledGoFiles
+	LoadImports = LoadFiles | packages.NeedImports
+	LoadTypes   = LoadImports | packages.NeedTypes | packages.NeedTypesSizes
+)
+
 func NewPackage(importPath string) *types.Package {
+	if importPath == "" {
+		return nil
+	}
+
 	if v, ok := pkgCache.Load(importPath); ok {
 		return v.(*types.Package)
 	}
-	pkg, err := importer.ForCompiler(token.NewFileSet(), "source", nil).Import(importPath)
-	if err != nil && importPath != "" {
+
+	c := packages.Config{
+		Overlay: make(map[string][]byte),
+		Tests:   true,
+		Mode:    LoadTypes,
+	}
+
+	pkgs, err := packages.Load(&c, importPath)
+	if err != nil {
 		panic(err)
 	}
+
+	pkg := pkgs[0].Types
 	pkgCache.Store(importPath, pkg)
 	return pkg
 }
 
 func TypeByName(importPath string, name string) types.Type {
 	pkg := NewPackage(importPath)
-	if pkg == nil {
-		return nil
+	if pkg != nil {
+		found := pkg.Scope().Lookup(name)
+		if found != nil {
+			return found.Type()
+		}
 	}
-	return pkg.Scope().Lookup(name).Type()
+	return nil
+}
+
+func PtrTo(t Type) Type {
+	switch x := t.(type) {
+	case *TType:
+		return FromTType(types.NewPointer(x.Type))
+	case *RType:
+		return FromRType(reflect.PtrTo(x.Type))
+	}
+	return nil
 }
 
 func NewTypesTypeFromReflectType(rtype reflect.Type) types.Type {

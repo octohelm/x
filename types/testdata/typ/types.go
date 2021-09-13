@@ -1,6 +1,8 @@
 package typ
 
 import (
+	"context"
+	"encoding"
 	"fmt"
 
 	"github.com/go-courier/x/types/testdata/typ/typ"
@@ -92,4 +94,12 @@ func (e Enum) MarshalText() ([]byte, error) {
 		return []byte("TWO"), nil
 	}
 	return []byte{}, fmt.Errorf("unknown enum")
+}
+
+type SomeMixInterface interface {
+	encoding.TextMarshaler
+	Stringify(ctx context.Context, vs ...interface{}) string
+	Add(a, b string) string
+	Bytes() []byte
+	s() string
 }

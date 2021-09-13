@@ -38,7 +38,6 @@ func methodsOf(typ types.Type) (methods []*TMethod) {
 			}
 			methods = append(methods, methodInfo)
 		}
-
 		methods = append(methods, methodsOf(t.Underlying())...)
 	case *types.Pointer:
 		methods = append(methods, methodsOf(t.Elem())...)
@@ -164,7 +163,35 @@ func (ttype *TType) Out(i int) Type {
 }
 
 func (ttype *TType) Implements(u Type) bool {
-	return types.Implements(ttype.Type, u.(*TType).Type.(*types.Interface))
+	switch x := u.(type) {
+	case *TType:
+		return types.Implements(ttype.Type, x.Type.(*types.Interface))
+	case *RType:
+		var tt Type = ttype
+		isPtr := false
+
+		for tt.Kind() == reflect.Ptr {
+			tt = tt.Elem()
+			isPtr = true
+		}
+
+		if tt.PkgPath() == "" || x.PkgPath() == "" {
+			return false
+		}
+
+		if isPtr {
+			return types.Implements(
+				types.NewPointer(TypeByName(tt.PkgPath(), tt.Name())),
+				NewTypesTypeFromReflectType(x.Type).Underlying().(*types.Interface),
+			)
+		}
+
+		return types.Implements(
+			TypeByName(tt.PkgPath(), tt.Name()),
+			NewTypesTypeFromReflectType(x.Type).Underlying().(*types.Interface),
+		)
+	}
+	return false
 }
 
 func (ttype *TType) AssignableTo(u Type) bool {

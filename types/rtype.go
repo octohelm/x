@@ -1,6 +1,7 @@
 package types
 
 import (
+	"go/types"
 	"reflect"
 )
 
@@ -36,7 +37,18 @@ func (rtype *RType) Out(i int) Type {
 }
 
 func (rtype *RType) Implements(u Type) bool {
-	return rtype.Type.Implements(u.(*RType).Type)
+	switch x := u.(type) {
+	case *RType:
+		return rtype.Type.Implements(x.Type)
+	case *TType:
+		if rtype.PkgPath() == "" {
+			return false
+		}
+		if i, ok := x.Type.(*types.Interface); ok {
+			return types.Implements(NewTypesTypeFromReflectType(rtype.Type), i)
+		}
+	}
+	return false
 }
 
 func (rtype *RType) AssignableTo(u Type) bool {

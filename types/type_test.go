@@ -1,7 +1,6 @@
 package types
 
 import (
-	"context"
 	"encoding"
 	"go/types"
 	"reflect"
@@ -26,13 +25,7 @@ func TestType(t *testing.T) {
 		typ.ENUM__ONE,
 
 		reflect.TypeOf((*encoding.TextMarshaler)(nil)).Elem(),
-		reflect.TypeOf((*interface {
-			encoding.TextMarshaler
-			Stringify(ctx context.Context, vs ...interface{}) string
-			Add(a, b string) string
-			Bytes() []byte
-			s() string
-		})(nil)).Elem(),
+		reflect.TypeOf((*typ.SomeMixInterface)(nil)).Elem(),
 
 		unsafe.Pointer(t),
 
