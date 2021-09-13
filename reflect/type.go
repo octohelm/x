@@ -6,13 +6,13 @@ import (
 )
 
 func IsBytes(v interface{}) bool {
-	switch x := v.(type) {
+	switch v.(type) {
 	case []byte:
 		return true
-	case reflect.Type:
-		return x.Kind() == reflect.Slice && x.Elem().Kind() == reflect.Uint8
 	default:
-		return IsBytes(reflect.TypeOf(v))
+		t := reflect.TypeOf(v)
+		// []Unit8
+		return t.Kind() == reflect.Slice && t.Elem().Kind() == reflect.Uint8 && t.Elem().PkgPath() == ""
 	}
 }
 

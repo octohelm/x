@@ -11,6 +11,10 @@ import (
 
 type Bytes []byte
 
+type Uint8 uint8
+
+type NotBytes []Uint8
+
 func BenchmarkIsBytes(b *testing.B) {
 	b.Run("Raw Bytes", func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
@@ -27,6 +31,9 @@ func BenchmarkIsBytes(b *testing.B) {
 func TestIsBytes(t *testing.T) {
 	t.Run("Raw Bytes", func(t *testing.T) {
 		NewWithT(t).Expect(IsBytes([]byte(""))).To(BeTrue())
+	})
+	t.Run("Not Bytes", func(t *testing.T) {
+		NewWithT(t).Expect(IsBytes(NotBytes(""))).To(BeFalse())
 	})
 	t.Run("Named Bytes", func(t *testing.T) {
 		NewWithT(t).Expect(IsBytes(Bytes(""))).To(BeTrue())
