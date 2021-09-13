@@ -10,7 +10,17 @@ func IsBytes(v interface{}) bool {
 	case []byte:
 		return true
 	default:
-		t := reflect.TypeOf(v)
+		var t reflect.Type
+
+		switch x := v.(type) {
+		case reflect.Type:
+			t = x
+		case reflect.Value:
+			t = x.Type()
+		default:
+			t = reflect.TypeOf(v)
+		}
+
 		// []Unit8
 		return t.Kind() == reflect.Slice && t.Elem().Kind() == reflect.Uint8 && t.Elem().PkgPath() == ""
 	}
