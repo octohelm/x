@@ -5,6 +5,14 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 
 
+# [0.0.7](https://github.com/go-courier/x/compare/v0.0.6...v0.0.7)
+
+### Bug Fixes
+
+* **fix(reflect):** Named Slice Item kind uint8 should not be bytes ([d3e10a5](https://github.com/go-courier/x/commit/d3e10a5d69e61fb1fc9f64548429105f56a2ab1d))
+
+
+
 # [0.0.6](https://github.com/go-courier/x/compare/v0.0.5...v0.0.6)
 
 ### Bug Fixes
