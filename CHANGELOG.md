@@ -5,6 +5,14 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 
 
+# [0.0.8](https://github.com/go-courier/x/compare/v0.0.7...v0.0.8)
+
+### Bug Fixes
+
+* **fix(reflect):** IsBytes should support reflect.Type, and reflect.Value ([02d7cf2](https://github.com/go-courier/x/commit/02d7cf24f40d96f0fa55912376ee04dedc4296dc))
+
+
+
 # [0.0.7](https://github.com/go-courier/x/compare/v0.0.6...v0.0.7)
 
 ### Bug Fixes
