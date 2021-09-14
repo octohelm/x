@@ -5,7 +5,16 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 
 
+# [0.0.11](https://github.com/go-courier/x/compare/v0.0.10...v0.0.11)
+
+### Bug Fixes
+
+* **fix(encoding):** []byte should base64 encoding/decoding flow encoding/json did ([e09f1fd](https://github.com/go-courier/x/commit/e09f1fdecbbb709bf3ec0cf42ab9032954fee64e))
+
+
+
 # [0.0.10](https://github.com/go-courier/x/compare/v0.0.9...v0.0.10)
+
 
 
 # [0.0.9](https://github.com/go-courier/x/compare/v0.0.8...v0.0.9)
