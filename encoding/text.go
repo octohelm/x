@@ -1,7 +1,9 @@
 package encoding
 
 import (
+	"bytes"
 	"encoding"
+	"encoding/base64"
 	"fmt"
 	"reflect"
 	"strconv"
@@ -34,7 +36,7 @@ func MarshalText(v interface{}) ([]byte, error) {
 
 	switch x := v.(type) {
 	case []byte:
-		return x, nil
+		return toBase64Encoded(x), nil
 	case string:
 		return []byte(x), nil
 	case bool:
@@ -75,8 +77,8 @@ func MarshalText(v interface{}) ([]byte, error) {
 
 		switch rv.Kind() {
 		case reflect.Slice:
-			if rv.Type().Elem().Kind() == reflect.Uint8 {
-				return rv.Bytes(), nil
+			if et := rv.Type().Elem(); et.PkgPath() == "" && et.Kind() == reflect.Uint8 {
+				return toBase64Encoded(rv.Bytes()), nil
 			}
 		case reflect.String:
 			return []byte(rv.String()), nil
@@ -131,8 +133,10 @@ func UnmarshalText(v interface{}, data []byte) error {
 
 	switch x := v.(type) {
 	case *[]byte:
-		d := make([]byte, len(data))
-		copy(d, data)
+		d, err := fromBase64Encoded(data)
+		if err != nil {
+			return err
+		}
 		*x = d
 	case *string:
 		*x = string(data)
@@ -234,8 +238,13 @@ func unmarshalTextToReflectValue(rv reflect.Value, data []byte) error {
 
 	switch rv.Kind() {
 	case reflect.Slice:
-		if rv.Type().Elem().Kind() == reflect.Uint8 {
-			rv.SetBytes(data)
+		et := rv.Type().Elem()
+		if et.PkgPath() == "" && et.Kind() == reflect.Uint8 {
+			d, err := fromBase64Encoded(data)
+			if err != nil {
+				return err
+			}
+			rv.SetBytes(d)
 		}
 	case reflect.String:
 		rv.SetString(string(data))
@@ -265,4 +274,28 @@ func unmarshalTextToReflectValue(rv reflect.Value, data []byte) error {
 		rv.SetBool(boolV)
 	}
 	return nil
+}
+
+// flow encoding/json did
+func fromBase64Encoded(data []byte) ([]byte, error) {
+	encodedLen := base64.StdEncoding.EncodedLen(len(data))
+	d := make([]byte, encodedLen)
+	n, err := base64.StdEncoding.Decode(d, data)
+	if err != nil {
+		return nil, err
+	}
+	return d[:n], nil
+}
+
+// flow encoding/json did
+func toBase64Encoded(data []byte) []byte {
+	encodedLen := base64.StdEncoding.EncodedLen(len(data))
+	if encodedLen <= 1024 {
+		d := make([]byte, encodedLen)
+		base64.StdEncoding.Encode(d, data)
+		return d
+	}
+	b := bytes.NewBuffer(nil)
+	base64.NewDecoder(base64.StdEncoding, b)
+	return b.Bytes()
 }

@@ -161,13 +161,13 @@ var cases = []struct {
 	{
 		"Bytes",
 		rv.FieldByName("Bytes"),
-		"111",
+		"MTEx",
 		[]byte("111"),
 	},
 	{
 		"Bytes direct",
 		&v.Bytes,
-		"111",
+		"MTEx",
 		func() *[]byte {
 			b := []byte("111")
 			return &b
