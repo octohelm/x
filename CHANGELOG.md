@@ -5,6 +5,9 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 
 
+# [0.0.10](https://github.com/go-courier/x/compare/v0.0.9...v0.0.10)
+
+
 # [0.0.9](https://github.com/go-courier/x/compare/v0.0.8...v0.0.9)
 
 ### Bug Fixes
