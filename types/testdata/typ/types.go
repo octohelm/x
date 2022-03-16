@@ -98,8 +98,23 @@ func (e Enum) MarshalText() ([]byte, error) {
 
 type SomeMixInterface interface {
 	encoding.TextMarshaler
-	Stringify(ctx context.Context, vs ...interface{}) string
+	Stringify(ctx context.Context, vs ...any) string
 	Add(a, b string) string
 	Bytes() []byte
 	s() string
+}
+
+type AnySlice[V any] []V
+
+func (m AnySlice[V]) Each() {
+
+}
+
+type AnyMap[K comparable, V any] map[K]V
+
+type IntMap = AnyMap[Enum, any]
+
+type AnyStruct[V any] struct {
+	Struct
+	Name V
 }

@@ -35,7 +35,7 @@ func Indirect(rv reflect.Value) reflect.Value {
 	return rv
 }
 
-func IsEmptyValue(v interface{}) bool {
+func IsEmptyValue(v any) bool {
 	if rv, ok := v.(reflect.Value); ok {
 		if rv.Kind() == reflect.Ptr && rv.IsNil() {
 			return true
@@ -85,7 +85,7 @@ func IsEmptyValue(v interface{}) bool {
 		return x == 0
 	case []byte:
 		return len(x) == 0
-	case []interface{}:
+	case []any:
 		return len(x) == 0
 	default:
 		return isEmptyReflectValue(reflect.ValueOf(x))

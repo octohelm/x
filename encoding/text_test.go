@@ -55,9 +55,9 @@ var (
 
 var cases = []struct {
 	name   string
-	v      interface{}
+	v      any
 	text   string
-	expect interface{}
+	expect any
 }{
 	{
 		"Ptr String",

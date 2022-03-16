@@ -13,6 +13,5 @@ cover:
 tidy:
 	go mod tidy
 
-outdated:
-	go list -u -m -json all | go-mod-outdated -update -direct -ci
+dep:
 	go get -u -t ./...

@@ -13,7 +13,7 @@ import (
 // interface like reflect.Type but only for data type
 type Type interface {
 	// Unwrap return reflect.Type or types.Type
-	Unwrap() interface{}
+	Unwrap() any
 
 	Name() string
 	PkgPath() string
@@ -36,6 +36,8 @@ type Type interface {
 	NumMethod() int
 	Method(i int) Method
 	MethodByName(name string) (Method, bool)
+
+	IsVariadic() bool
 
 	NumIn() int
 	In(i int) Type

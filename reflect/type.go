@@ -5,7 +5,7 @@ import (
 	"reflect"
 )
 
-func IsBytes(v interface{}) bool {
+func IsBytes(v any) bool {
 	switch v.(type) {
 	case []byte:
 		return true

@@ -45,14 +45,10 @@ func NewPackage(importPath string) *types.Package {
 }
 
 func TypeByName(importPath string, name string) types.Type {
-	pkg := NewPackage(importPath)
-	if pkg != nil {
-		found := pkg.Scope().Lookup(name)
-		if found != nil {
-			return found.Type()
-		}
+	if importPath == "" {
+		return TypeFor(name)
 	}
-	return nil
+	return TypeFor(importPath + "." + name)
 }
 
 func PtrTo(t Type) Type {
@@ -87,7 +83,9 @@ func NewTypesTypeFromReflectType(rtype reflect.Type) types.Type {
 				result := rtype.Out(i)
 				results[i] = types.NewParam(0, NewPackage(result.PkgPath()), "", NewTypesTypeFromReflectType(result))
 			}
-			return types.NewSignature(
+			return types.NewSignatureType(
+				nil,
+				nil,
 				nil,
 				types.NewTuple(params...),
 				types.NewTuple(results...),
@@ -180,7 +178,7 @@ func NewTypesTypeFromReflectType(rtype reflect.Type) types.Type {
 	pkgPath := rtype.PkgPath()
 
 	if name == "error" && pkgPath == "" {
-		return mayWithPtr(TypeByName("errors", "New").Underlying().(*types.Signature).Results().At(0).Type())
+		return nil
 	}
 
 	if pkgPath != "" {
@@ -189,13 +187,7 @@ func NewTypesTypeFromReflectType(rtype reflect.Type) types.Type {
 			key = pkgPath + "." + name
 		}
 
-		if typ, ok := typesCache.Load(key); ok {
-			return mayWithPtr(typ.(types.Type))
-		}
-
-		ttype := TypeByName(pkgPath, name)
-		typesCache.Store(key, ttype)
-		return mayWithPtr(ttype)
+		return mayWithPtr(TypeFor(key))
 	}
 
 	return mayWithPtr(underlying())

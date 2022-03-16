@@ -12,7 +12,7 @@ import (
 	pkgerrors "github.com/pkg/errors"
 )
 
-func MarshalText(v interface{}) ([]byte, error) {
+func MarshalText(v any) ([]byte, error) {
 	if rv, ok := v.(reflect.Value); ok {
 		for rv.Kind() == reflect.Ptr {
 			if rv.IsNil() {
@@ -98,7 +98,7 @@ func MarshalText(v interface{}) ([]byte, error) {
 	}
 }
 
-func UnmarshalText(v interface{}, data []byte) error {
+func UnmarshalText(v any, data []byte) error {
 	if rv, ok := v.(reflect.Value); ok {
 		if rv.Kind() != reflect.Ptr {
 			rv = rv.Addr()

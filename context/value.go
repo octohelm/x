@@ -7,7 +7,7 @@ import (
 )
 
 // WithValue seem as context.WithValue but without key type comparable check, and be 20x faster
-func WithValue(parent context.Context, key interface{}, val interface{}) context.Context {
+func WithValue(parent context.Context, key any, val any) context.Context {
 	if parent == nil {
 		panic("cannot create context from nil parent")
 	}
@@ -19,21 +19,21 @@ func WithValue(parent context.Context, key interface{}, val interface{}) context
 
 type valueCtx struct {
 	context.Context
-	key, val interface{}
+	key, val any
 }
 
 func (c *valueCtx) String() string {
 	return contextName(c.Context) + ".WithValue(type " + reflect.TypeOf(c.key).String() + ", val " + stringify(c.val) + ")"
 }
 
-func (c *valueCtx) Value(key interface{}) interface{} {
+func (c *valueCtx) Value(key any) any {
 	if c.key == key {
 		return c.val
 	}
 	return c.Context.Value(key)
 }
 
-func stringify(v interface{}) string {
+func stringify(v any) string {
 	switch s := v.(type) {
 	case fmt.Stringer:
 		return s.String()

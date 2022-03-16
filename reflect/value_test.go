@@ -63,13 +63,13 @@ func TestNew(t *testing.T) {
 }
 
 type S struct {
-	V interface{}
+	V any
 }
 
-var emptyValues = []interface{}{
+var emptyValues = []any{
 	Zero(""),
 	(*string)(nil),
-	(interface{})(nil),
+	(any)(nil),
 	(S{}).V,
 	"",
 	0,
@@ -80,7 +80,7 @@ var emptyValues = []interface{}{
 	nil,
 }
 
-var nonEmptyValues = []interface{}{
+var nonEmptyValues = []any{
 	Zero("11111111111"),
 	ptr.String("12322"),
 }

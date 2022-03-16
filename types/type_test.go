@@ -18,9 +18,15 @@ func TestType(t *testing.T) {
 		return true
 	}
 
-	values := []interface{}{
-		typ.DeepCompose{},
+	values := []any{
+		typ.AnyStruct[string]{
+			Name: "x",
+		},
+		typ.AnySlice[string]{},
+		typ.AnyMap[int, string]{},
+		typ.IntMap{},
 
+		typ.DeepCompose{},
 		func() *typ.Enum { v := typ.ENUM__ONE; return &v }(),
 		typ.ENUM__ONE,
 
@@ -95,7 +101,7 @@ func TestType(t *testing.T) {
 	}
 }
 
-func check(t *testing.T, v interface{}) {
+func check(t *testing.T, v any) {
 	rtype, ok := v.(reflect.Type)
 	if !ok {
 		rtype = reflect.TypeOf(v)
@@ -119,10 +125,13 @@ func check(t *testing.T, v interface{}) {
 		for i := 0; i < rt.NumMethod(); i++ {
 			rMethod := rt.Method(i)
 			tMethod, ok := tt.MethodByName(rMethod.Name())
-			NewWithT(t).Expect(ok).To(BeTrue())
-			NewWithT(t).Expect(rMethod.Name()).To(Equal(tMethod.Name()))
-			NewWithT(t).Expect(rMethod.PkgPath()).To(Equal(tMethod.PkgPath()))
-			NewWithT(t).Expect(rMethod.Type().String()).To(Equal(tMethod.Type().String()))
+
+			t.Run("M "+rMethod.Name()+" | "+rMethod.Type().String(), func(t *testing.T) {
+				NewWithT(t).Expect(ok).To(BeTrue())
+				NewWithT(t).Expect(rMethod.Name()).To(Equal(tMethod.Name()))
+				NewWithT(t).Expect(rMethod.PkgPath()).To(Equal(tMethod.PkgPath()))
+				NewWithT(t).Expect(rMethod.Type().String()).To(Equal(tMethod.Type().String()))
+			})
 		}
 
 		{
@@ -157,11 +166,13 @@ func check(t *testing.T, v interface{}) {
 				rsf := rt.Field(i)
 				tsf := tt.Field(i)
 
-				NewWithT(t).Expect(rsf.Anonymous()).To(Equal(tsf.Anonymous()))
-				NewWithT(t).Expect(rsf.Tag()).To(Equal(tsf.Tag()))
-				NewWithT(t).Expect(rsf.Name()).To(Equal(tsf.Name()))
-				NewWithT(t).Expect(rsf.PkgPath()).To(Equal(tsf.PkgPath()))
-				NewWithT(t).Expect(FullTypeName(rsf.Type())).To(Equal(FullTypeName(tsf.Type())))
+				t.Run("F "+rsf.Name(), func(t *testing.T) {
+					NewWithT(t).Expect(rsf.Anonymous()).To(Equal(tsf.Anonymous()))
+					NewWithT(t).Expect(rsf.Tag()).To(Equal(tsf.Tag()))
+					NewWithT(t).Expect(rsf.Name()).To(Equal(tsf.Name()))
+					NewWithT(t).Expect(rsf.PkgPath()).To(Equal(tsf.PkgPath()))
+					NewWithT(t).Expect(FullTypeName(rsf.Type())).To(Equal(FullTypeName(tsf.Type())))
+				})
 			}
 
 			if rt.NumField() > 0 {

@@ -1,0 +1,16 @@
+[hooks]
+pre-commit = [
+    # todo enable until genrics supports
+    # "golangci-lint run",
+    "husky lint-staged"
+
+]
+
+commit-msg = [
+    "husky lint-commit"
+]
+
+[lint-staged]
+"*.go" = [
+    "goimports -l -w"
+]

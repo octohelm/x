@@ -13,7 +13,7 @@ type RType struct {
 	reflect.Type
 }
 
-func (rtype *RType) Unwrap() interface{} {
+func (rtype *RType) Unwrap() any {
 	return rtype.Type
 }
 
@@ -89,6 +89,10 @@ func (rtype *RType) Key() Type {
 
 func (rtype *RType) Elem() Type {
 	return FromRType(rtype.Type.Elem())
+}
+
+func (rtype *RType) String() string {
+	return typeString(rtype)
 }
 
 type RStructField struct {

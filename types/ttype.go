@@ -1,16 +1,16 @@
 package types
 
 import (
-	"bytes"
-	"fmt"
 	"go/ast"
 	"go/types"
 	"reflect"
-	"strconv"
 	"strings"
 )
 
 func FromTType(ttype types.Type) *TType {
+	if tp, ok := ttype.(*types.TypeParam); ok {
+		return &TType{Type: tp.Constraint()}
+	}
 	return &TType{Type: ttype}
 }
 
@@ -22,7 +22,14 @@ type TType struct {
 	ptrMethods    []*types.Func
 }
 
-func (ttype *TType) Unwrap() interface{} {
+func (ttype *TType) IsVariadic() bool {
+	if s, ok := ttype.Type.(*types.Signature); ok {
+		return s.Variadic()
+	}
+	return false
+}
+
+func (ttype *TType) Unwrap() any {
 	return ttype.Type
 }
 
@@ -90,9 +97,9 @@ func (ttype *TType) Method(i int) Method {
 	if ttype.Kind() == reflect.Interface {
 		switch t := ttype.Type.(type) {
 		case *types.Named:
-			return &TMethod{Recv: ttype, Func: t.Underlying().(*types.Interface).Method(i)}
+			return &TMethod{Func: t.Underlying().(*types.Interface).Method(i)}
 		case *types.Interface:
-			return &TMethod{Recv: ttype, Func: t.Method(i)}
+			return &TMethod{Func: t.Method(i)}
 		}
 	}
 
@@ -203,13 +210,16 @@ func (ttype *TType) ConvertibleTo(u Type) bool {
 }
 
 func (ttype *TType) Comparable() bool {
+	if ttype.Kind() == reflect.Struct {
+		return true
+	}
 	return types.Comparable(ttype.Type)
 }
 
 func (ttype *TType) Field(i int) StructField {
 	switch t := ttype.Type.(type) {
 	case *types.Named:
-		return FromTType(t.Underlying()).Field(i)
+		return FromTType(ConstraintUnderlying(t.TypeParams(), t.Underlying())).Field(i)
 	case *types.Struct:
 		return &TStructField{Var: t.Field(i), TagStr: t.Tag(i)}
 	}
@@ -321,7 +331,25 @@ func (ttype *TType) Kind() reflect.Kind {
 func (ttype *TType) Name() string {
 	switch t := ttype.Type.(type) {
 	case *types.Named:
-		return t.Obj().Name()
+		b := strings.Builder{}
+		b.WriteString(t.Obj().Name())
+		typeParams := t.TypeParams()
+		if n := typeParams.Len(); n > 0 {
+			b.WriteString("[")
+			for i := 0; i < n; i++ {
+				if i > 0 {
+					b.WriteString(",")
+				}
+				a := typeParams.At(i).Constraint().(*types.Interface)
+				if a.NumEmbeddeds() > 0 {
+					b.WriteString(typeString(FromTType(a.EmbeddedType(0))))
+				} else {
+					b.WriteString(typeString(FromTType(a)))
+				}
+			}
+			b.WriteString("]")
+		}
+		return b.String()
 	case *types.Basic:
 		return t.Name()
 	}
@@ -331,7 +359,12 @@ func (ttype *TType) Name() string {
 func (ttype *TType) PkgPath() string {
 	switch x := ttype.Type.(type) {
 	case *types.Named:
-		return x.Obj().Pkg().Path()
+		if pkg := x.Obj().Pkg(); pkg != nil {
+			return pkg.Path()
+		}
+		if x.String() == "error" {
+			return ""
+		}
 	case *types.Basic:
 		// unsafe.Pointer as basic since 1.17
 		if strings.HasPrefix(x.String(), "unsafe.") {
@@ -342,23 +375,74 @@ func (ttype *TType) PkgPath() string {
 }
 
 func (ttype *TType) Key() Type {
-	if named, ok := ttype.Type.(*types.Named); ok {
-		return FromTType(named.Underlying()).Key()
-	}
-	if typ, ok := ttype.Type.(interface{ Key() types.Type }); ok {
-		return FromTType(typ.Key())
+	switch t := ttype.Type.(type) {
+	case *types.Named:
+		return FromTType(ConstraintUnderlying(t.TypeParams(), t.Underlying())).Key()
+	case interface{ Key() types.Type }:
+		return FromTType(t.Key())
 	}
 	return nil
 }
 
 func (ttype *TType) Elem() Type {
-	if named, ok := ttype.Type.(*types.Named); ok {
-		return FromTType(named.Underlying()).Elem()
-	}
-	if typ, ok := ttype.Type.(interface{ Elem() types.Type }); ok {
-		return FromTType(typ.Elem())
+	switch t := ttype.Type.(type) {
+	case *types.Named:
+		return FromTType(ConstraintUnderlying(t.TypeParams(), t.Underlying())).Elem()
+	case interface{ Elem() types.Type }:
+		return FromTType(t.Elem())
 	}
 	return nil
+}
+
+func ConstraintUnderlying(typeParamList *types.TypeParamList, underlying types.Type) types.Type {
+	if typeParamList.Len() == 0 {
+		return underlying
+	}
+
+	switch t := underlying.(type) {
+	case *types.TypeParam:
+		a := typeParamList.At(t.Index()).Constraint().(*types.Interface)
+		if a.NumEmbeddeds() > 0 {
+			return a.EmbeddedType(0)
+		}
+		return a
+	case *types.Map:
+		return types.NewMap(
+			ConstraintUnderlying(typeParamList, t.Key()),
+			ConstraintUnderlying(typeParamList, t.Elem()),
+		)
+	case *types.Slice:
+		return types.NewSlice(
+			ConstraintUnderlying(typeParamList, t.Elem()),
+		)
+	case *types.Array:
+		return types.NewArray(
+			ConstraintUnderlying(typeParamList, t.Elem()),
+			t.Len(),
+		)
+	case *types.Struct:
+		n := t.NumFields()
+		tags := make([]string, n)
+		fields := make([]*types.Var, n)
+
+		for i := 0; i < n; i++ {
+			f := t.Field(i)
+
+			fields[i] = types.NewField(
+				f.Pos(),
+				f.Pkg(),
+				f.Name(),
+				ConstraintUnderlying(typeParamList, f.Type()),
+				f.Embedded(),
+			)
+
+			tags[i] = t.Tag(i)
+		}
+
+		return types.NewStruct(fields, tags)
+	}
+
+	return underlying
 }
 
 func (ttype *TType) Len() int {
@@ -372,154 +456,7 @@ func (ttype *TType) Len() int {
 }
 
 func (ttype *TType) String() string {
-	typeString := func(typ types.Type) string {
-		return types.TypeString(typ, func(pkg *types.Package) string {
-			return pkg.Name()
-		})
-	}
-
-	switch t := ttype.Type.(type) {
-	case *types.Basic:
-		return ttype.Kind().String()
-	case *types.Slice:
-		return "[]" + FromTType(t.Elem()).String()
-	case *types.Array:
-		return fmt.Sprintf("[%d]", t.Len()) + FromTType(t.Elem()).String()
-	case *types.Map:
-		return fmt.Sprintf("map[%s]%s", FromTType(t.Key()), FromTType(t.Elem()))
-	case *types.Chan:
-		return "chan " + FromTType(t.Elem()).String()
-	case *types.Struct:
-		buf := bytes.NewBuffer(nil)
-		buf.WriteString("struct {")
-		n := t.NumFields()
-		for i := 0; i < n; i++ {
-			buf.WriteRune(' ')
-			f := t.Field(i)
-			if !f.Anonymous() {
-				buf.WriteString(f.Name())
-				buf.WriteRune(' ')
-			}
-			buf.WriteString(FromTType(f.Type()).String())
-
-			tag := t.Tag(i)
-			if tag != "" {
-				buf.WriteRune(' ')
-				buf.WriteString(strconv.Quote(tag))
-			}
-
-			if i == n-1 {
-				buf.WriteRune(' ')
-			} else {
-				buf.WriteRune(';')
-			}
-		}
-		buf.WriteString("}")
-		return buf.String()
-	case *types.Interface:
-		buf := bytes.NewBuffer(nil)
-		buf.WriteString("interface {")
-		n := t.NumMethods()
-		for i := 0; i < n; i++ {
-			buf.WriteRune(' ')
-			m := &TMethod{Func: t.Method(i)}
-
-			pkgPath := m.PkgPath()
-			if pkgPath != "" {
-				pkg := NewPackage(pkgPath)
-				buf.WriteString(pkg.Name())
-				buf.WriteRune('.')
-			}
-
-			buf.WriteString(m.Name())
-			buf.WriteString(m.Type().String()[4:])
-
-			if i == n-1 {
-				buf.WriteRune(' ')
-			} else {
-				buf.WriteRune(';')
-			}
-		}
-		buf.WriteString("}")
-		return buf.String()
-	case *types.Signature:
-		buf := bytes.NewBuffer(nil)
-		buf.WriteString("func(")
-		{
-			params := t.Params()
-			n := params.Len()
-
-			recv := t.Recv()
-			if recv != nil {
-				switch recvTyp := recv.Type().(type) {
-				case *types.Pointer:
-					elem := recvTyp.Elem()
-
-					if FromTType(elem).Kind() != reflect.Interface {
-						buf.WriteRune('*')
-						buf.WriteString(typeString(elem))
-						if n > 0 {
-							buf.WriteString(", ")
-						}
-					}
-				case *types.Named:
-					if FromTType(recvTyp).Kind() != reflect.Interface {
-						buf.WriteString(typeString(recvTyp))
-						if n > 0 {
-							buf.WriteString(", ")
-						}
-					}
-				case *types.Struct:
-					buf.WriteString(FromTType(recvTyp).String())
-					if n > 0 {
-						buf.WriteString(", ")
-					}
-				}
-			}
-
-			for i := 0; i < n; i++ {
-				p := params.At(i)
-
-				if i == n-1 && t.Variadic() {
-					buf.WriteString("...")
-					buf.WriteString(FromTType(p.Type().(*types.Slice).Elem()).String())
-				} else {
-					buf.WriteString(FromTType(p.Type()).String())
-				}
-
-				if i < n-1 {
-					buf.WriteString(", ")
-				}
-			}
-			buf.WriteString(")")
-		}
-
-		{
-			results := t.Results()
-			n := results.Len()
-			if n > 0 {
-				buf.WriteRune(' ')
-			}
-			if n > 1 {
-				buf.WriteString("(")
-			}
-			for i := 0; i < n; i++ {
-				if i > 0 {
-					buf.WriteString(", ")
-				}
-
-				r := results.At(i)
-				buf.WriteString(FromTType(r.Type()).String())
-			}
-			if n > 1 {
-				buf.WriteString(")")
-			}
-		}
-
-		return buf.String()
-	}
-
-	return typeString(ttype.Type)
+	return typeString(ttype)
 }
 
 type TStructField struct {
@@ -569,18 +506,24 @@ func (m *TMethod) Name() string {
 
 func (m *TMethod) Type() Type {
 	s := m.Func.Type().(*types.Signature)
+
 	if m.Recv == nil {
 		return FromTType(s)
 	}
 
-	pkg := (*types.Package)(nil)
-	if named, ok := m.Recv.Type.(*types.Named); ok {
-		pkg = named.Obj().Pkg()
+	vars := make([]*types.Var, s.Params().Len()+1)
+
+	vars[0] = types.NewVar(0, nil, "", m.Recv.Type)
+
+	for i := 0; i < s.Params().Len(); i++ {
+		vars[i+1] = s.Params().At(i)
 	}
 
-	return FromTType(types.NewSignature(
-		types.NewVar(0, pkg, "", m.Recv.Type),
-		s.Params(),
+	return FromTType(types.NewSignatureType(
+		nil,
+		nil,
+		nil,
+		types.NewTuple(vars...),
 		s.Results(),
 		s.Variadic(),
 	))

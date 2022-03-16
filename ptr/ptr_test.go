@@ -6,6 +6,12 @@ import (
 	. "github.com/onsi/gomega"
 )
 
+func TestPtr(t *testing.T) {
+	var b *bool
+	b = Ptr(true)
+	NewWithT(t).Expect(b).To(Equal(Bool(true)))
+}
+
 func TestBool(t *testing.T) {
 	NewWithT(t).Expect(bool(true)).To(Equal(*Bool(true)))
 	NewWithT(t).Expect(bool(false)).To(Equal(*Bool(false)))

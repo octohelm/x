@@ -1,5 +1,9 @@
 package ptr
 
+func Ptr[T any](v T) *T {
+	return &v
+}
+
 func Bool(v bool) *bool {
 	return &v
 }
