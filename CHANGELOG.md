@@ -5,6 +5,14 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 
 
+# [0.1.0](https://github.com/go-courier/x/compare/v0.0.11...v0.1.0)
+
+### Features
+
+* **feat** added generics support ([c097ed9](https://github.com/go-courier/x/commit/c097ed96f5c38b174c8fc871543b734a11b7e927))
+
+
+
 # [0.0.11](https://github.com/go-courier/x/compare/v0.0.10...v0.0.11)
 
 ### Bug Fixes
