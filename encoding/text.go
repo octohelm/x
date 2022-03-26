@@ -5,6 +5,7 @@ import (
 	"encoding"
 	"encoding/base64"
 	"fmt"
+	"io"
 	"reflect"
 	"strconv"
 
@@ -295,7 +296,10 @@ func toBase64Encoded(data []byte) []byte {
 		base64.StdEncoding.Encode(d, data)
 		return d
 	}
-	b := bytes.NewBuffer(nil)
-	base64.NewDecoder(base64.StdEncoding, b)
-	return b.Bytes()
+	output := bytes.NewBuffer(nil)
+	r := bytes.NewBuffer(data)
+	enc := base64.NewEncoder(base64.StdEncoding, output)
+	_, _ = io.Copy(enc, r)
+	_ = enc.Close()
+	return output.Bytes()
 }

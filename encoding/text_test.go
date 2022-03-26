@@ -1,11 +1,15 @@
 package encoding
 
 import (
+	"encoding/base64"
 	"fmt"
 	"reflect"
 	"strconv"
+	"strings"
 	"testing"
 	"time"
+
+	"github.com/go-courier/x/slices"
 
 	"github.com/go-courier/x/ptr"
 	. "github.com/onsi/gomega"
@@ -29,6 +33,10 @@ func (d *Duration) UnmarshalText(data []byte) error {
 type NamedString string
 type NamedInt int
 
+var longBytes = strings.Join(slices.Map(make([]string, 1025), func(e string) string {
+	return "1"
+}), "")
+
 var (
 	v = struct {
 		NamedString  NamedString
@@ -47,6 +55,7 @@ var (
 		Bool         bool
 		PtrBool      *bool
 		Bytes        []byte
+		LongBytes    []byte
 	}{}
 
 	rv = reflect.ValueOf(&v).Elem()
@@ -170,6 +179,15 @@ var cases = []struct {
 		"MTEx",
 		func() *[]byte {
 			b := []byte("111")
+			return &b
+		}(),
+	},
+	{
+		"LongBytes direct",
+		&v.LongBytes,
+		base64.StdEncoding.EncodeToString([]byte(longBytes)),
+		func() *[]byte {
+			b := []byte(longBytes)
 			return &b
 		}(),
 	},
