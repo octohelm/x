@@ -1,9 +1,7 @@
 [hooks]
 pre-commit = [
-    # todo enable until genrics supports
-    # "golangci-lint run",
+    "golangci-lint run",
     "husky lint-staged"
-
 ]
 
 commit-msg = [
