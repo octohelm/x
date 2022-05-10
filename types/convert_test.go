@@ -15,8 +15,8 @@ func TestTypeFor(t *testing.T) {
 		"[2]int",
 		"error",
 
-		"github.com/go-courier/x/types/testdata/typ.String",
-		"github.com/go-courier/x/types/testdata/typ.AnyMap[int,string]",
+		"github.com/octohelm/x/types/testdata/typ.String",
+		"github.com/octohelm/x/types/testdata/typ.AnyMap[int,string]",
 	}
 
 	for i := range cases {

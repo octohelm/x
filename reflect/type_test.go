@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/go-courier/x/ptr"
+	"github.com/octohelm/x/ptr"
 	. "github.com/onsi/gomega"
 )
 

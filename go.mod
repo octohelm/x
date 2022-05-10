@@ -1,4 +1,4 @@
-module github.com/go-courier/x
+module github.com/octohelm/x
 
 go 1.18
 

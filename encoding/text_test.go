@@ -9,9 +9,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/go-courier/x/slices"
+	"github.com/octohelm/x/slices"
 
-	"github.com/go-courier/x/ptr"
+	"github.com/octohelm/x/ptr"
 	. "github.com/onsi/gomega"
 )
 

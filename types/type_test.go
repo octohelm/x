@@ -7,9 +7,9 @@ import (
 	"testing"
 	"unsafe"
 
-	"github.com/go-courier/x/ptr"
-	"github.com/go-courier/x/types/testdata/typ"
-	typ2 "github.com/go-courier/x/types/testdata/typ/typ"
+	"github.com/octohelm/x/ptr"
+	"github.com/octohelm/x/types/testdata/typ"
+	typ2 "github.com/octohelm/x/types/testdata/typ/typ"
 	. "github.com/onsi/gomega"
 )
 
