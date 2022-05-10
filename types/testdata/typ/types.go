@@ -5,7 +5,7 @@ import (
 	"encoding"
 	"fmt"
 
-	"github.com/go-courier/x/types/testdata/typ/typ"
+	"github.com/octohelm/x/types/testdata/typ/typ"
 )
 
 type String string

@@ -6,14 +6,14 @@ import (
 
 	"golang.org/x/exp/slices"
 
-	. "github.com/go-courier/x/testing"
+	. "github.com/octohelm/x/testing"
 )
 
 func Test(t *testing.T) {
 	t.Run("Matchers", func(t *testing.T) {
 		t.Run("Should check", func(t *testing.T) {
 			Expect(t, "1",
-				Should(Equal[string], "2"),
+				Should(Equal[string], "1"),
 				ShouldNot(Equal[string], "2"),
 				ShouldNot(strings.Contains, "x"),
 			)
@@ -54,7 +54,7 @@ func Test(t *testing.T) {
 	t.Run("Should get project root", func(t *testing.T) {
 		pr := ProjectRoot()
 		Expect(t, pr,
-			Should(strings.HasSuffix, "github.com/go-courier/x"),
+			Should(strings.HasSuffix, "/x"),
 		)
 	})
 }
