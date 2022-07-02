@@ -26,12 +26,6 @@ func HaveLen[A any](c int) Matcher[A] {
 	}, "HaveLen")(c)
 }
 
-func Not[A any](matcher Matcher[A]) Matcher[A] {
-	return &negativeMatcher[A]{
-		Matcher: matcher,
-	}
-}
-
 func MatcherWith[A any, E any](match func(a A, e E) bool, name string) func(e E) Matcher[A] {
 	return func(expected E) Matcher[A] {
 		return &matcher[A, E]{
@@ -39,6 +33,12 @@ func MatcherWith[A any, E any](match func(a A, e E) bool, name string) func(e E)
 			match:    match,
 			expected: expected,
 		}
+	}
+}
+
+func Not[A any](matcher Matcher[A]) Matcher[A] {
+	return &negativeMatcher[A]{
+		Matcher: matcher,
 	}
 }
 

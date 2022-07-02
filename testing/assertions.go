@@ -7,14 +7,14 @@ import (
 	"github.com/onsi/gomega/format"
 )
 
-func Expect[A any](t *testing.T, actual A, matcheres ...Matcher[A]) {
+func Expect[A any](t testing.TB, actual A, matcheres ...Matcher[A]) {
 	t.Helper()
 	for i := range matcheres {
 		assert(t, actual, matcheres[i])
 	}
 }
 
-func assert[A any](t *testing.T, actual A, m Matcher[A]) {
+func assert[A any](t testing.TB, actual A, m Matcher[A]) {
 	ok := m.Match(actual)
 	if m.Negative() {
 		if !ok {
