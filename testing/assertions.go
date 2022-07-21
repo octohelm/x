@@ -45,3 +45,7 @@ func failureMessage[A any](actual A, m Matcher[A]) string {
 		fmt.Sprintf("%v", m.Expected()),
 	)
 }
+
+func init() {
+	format.TruncateThreshold = 200
+}
