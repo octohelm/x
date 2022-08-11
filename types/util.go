@@ -137,15 +137,22 @@ func typeString(t Type) string {
 	return t.Name()
 }
 
-var basicTypes = map[string]types.Type{}
+var basicTypes = map[string]func() types.Type{}
 
 func init() {
-	for _, b := range types.Typ {
-		basicTypes[types.TypeString(b, nil)] = b
+	for i := range types.Typ {
+		b := types.Typ[i]
+		basicTypes[types.TypeString(b, nil)] = func() types.Type {
+			return b
+		}
 	}
 
-	basicTypes["interface {}"] = types.NewInterfaceType(nil, nil)
-	basicTypes["error"] = NewPackage("errors").Scope().Lookup("New").Type().Underlying().(*types.Signature).Results().At(0).Type()
+	basicTypes["interface {}"] = func() types.Type {
+		return types.NewInterfaceType(nil, nil)
+	}
+	basicTypes["error"] = func() types.Type {
+		return NewPackage("errors").Scope().Lookup("New").Type().Underlying().(*types.Signature).Results().At(0).Type()
+	}
 }
 
 func TypeFor(id string) types.Type {
@@ -162,8 +169,8 @@ func typeFor(id string) types.Type {
 		return types.Typ[types.Invalid]
 	}
 
-	if t, ok := basicTypes[id]; ok {
-		return t
+	if getType, ok := basicTypes[id]; ok {
+		return getType()
 	}
 
 	if l := strings.Index(id, "map["); l == 0 {
