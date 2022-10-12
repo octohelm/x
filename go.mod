@@ -3,7 +3,7 @@ module github.com/octohelm/x
 go 1.19
 
 require (
-	github.com/onsi/gomega v1.20.0
+	github.com/onsi/gomega v1.22.1
 	github.com/pkg/errors v0.9.1
 	golang.org/x/exp v0.0.0-20220713135740-79cabaa25d75
 	golang.org/x/tools v0.1.12
