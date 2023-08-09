@@ -4,14 +4,14 @@ import (
 	"strings"
 	"testing"
 
-	"golang.org/x/exp/slices"
+	"slices"
 
 	. "github.com/octohelm/x/testing"
 )
 
 func Test(t *testing.T) {
 	var (
-		ContainsStringItem = MatcherWith(slices.Contains[string], "ContainsStringItem")
+		ContainsStringItem = MatcherWith(slices.Contains[[]string, string], "ContainsStringItem")
 		HaveStringSuffix   = MatcherWith(strings.HasSuffix, "HaveStringSuffix")
 	)
 
