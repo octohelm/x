@@ -130,6 +130,10 @@ func Deref(typ Type) Type {
 }
 
 func FullTypeName(typ Type) string {
+	if typ == nil {
+		return "nil"
+	}
+
 	buf := &strings.Builder{}
 
 	for typ.Kind() == reflect.Ptr {
