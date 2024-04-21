@@ -11,15 +11,15 @@ import (
 
 func Test(t *testing.T) {
 	var (
-		ContainsStringItem = MatcherWith(slices.Contains[[]string, string], "ContainsStringItem")
-		HaveStringSuffix   = MatcherWith(strings.HasSuffix, "HaveStringSuffix")
+		ContainsStringItem = NewCompareMatcher("ContainsStringItem", slices.Contains[[]string, string])
+		HaveStringSuffix   = NewCompareMatcher("HaveStringSuffix", strings.HasSuffix)
 	)
 
 	t.Run("Matchers", func(t *testing.T) {
-		t.Run("Should check", func(t *testing.T) {
+		t.Run("Should not equal", func(t *testing.T) {
 			Expect(t, "1",
 				Equal("1"),
-				Not(Equal("2")),
+				NotEqual("2"),
 			)
 		})
 
@@ -33,6 +33,10 @@ func Test(t *testing.T) {
 			Expect(t, error(nil),
 				Be[error](nil),
 			)
+		})
+
+		t.Run("Should empty", func(t *testing.T) {
+			Expect(t, "", BeEmpty[string]())
 		})
 
 		t.Run("Should Contains and Have Len", func(t *testing.T) {

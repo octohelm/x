@@ -1,80 +1,79 @@
 package testing
 
-import "reflect"
+import (
+	"reflect"
 
-func Be[A any](e A) Matcher[A] {
-	return MatcherWith[A, A](func(a A, e A) bool {
+	reflectx "github.com/octohelm/x/reflect"
+)
+
+func NotBeNil[T any]() Matcher[T] {
+	return Not(BeNil[T]())
+}
+
+func BeNil[T any]() Matcher[T] {
+	return NewMatcher[T]("BeNil", func(a T) bool {
+		return any(a) == nil
+	})
+}
+
+func BeTrue() Matcher[bool] {
+	return NewMatcher[bool]("BeTrue", func(a bool) bool {
+		return a
+	})
+}
+
+func BeFalse() Matcher[bool] {
+	return NewMatcher[bool]("BeFalse", func(a bool) bool {
+		return !a
+	})
+}
+
+func NotBeEmpty[T any]() Matcher[T] {
+	return Not(BeEmpty[T]())
+}
+
+func BeEmpty[T any]() Matcher[T] {
+	return NewMatcher("BeEmpty", func(a T) bool {
+		return reflectx.IsEmptyValue(a)
+	})
+}
+
+func NotBe[T any](e T) Matcher[T] {
+	return Not(Be[T](e))
+}
+
+func Be[T any](e T) Matcher[T] {
+	return NewCompareMatcher[T, T]("Be", func(a T, e T) bool {
 		return any(a) == any(e)
-	}, "Be")(e)
+	})(e)
 }
 
-func Equal[A any](e A) Matcher[A] {
-	return MatcherWith[A, A](func(a A, e A) bool {
+func NotEqual[T any](e T) Matcher[T] {
+	return Not(Equal[T](e))
+}
+
+func Equal[T any](e T) Matcher[T] {
+	return NewCompareMatcher[T, T]("Equal", func(a T, e T) bool {
 		return reflect.DeepEqual(a, e)
-	}, "Equal")(e)
+	})(e)
 }
 
-func HaveCap[A any](c int) Matcher[A] {
-	return MatcherWith[A, int](func(a A, c int) bool {
+func NotHaveCap[T any](c int) Matcher[T] {
+	return Not(HaveCap[T](c))
+}
+
+func HaveCap[T any](c int) Matcher[T] {
+	return NewCompareMatcher[T, int]("HaveCap", func(a T, c int) bool {
 		return reflect.ValueOf(a).Cap() == c
-	}, "HaveCap")(c)
+	})(c)
 }
 
-func HaveLen[A any](c int) Matcher[A] {
-	return MatcherWith[A, int](func(a A, c int) bool {
+func NotHaveLen[T any](c int) Matcher[T] {
+	return Not(HaveLen[T](c))
+}
+
+func HaveLen[T any](c int) Matcher[T] {
+	return NewCompareMatcher[T, int]("HaveLen", func(a T, c int) bool {
 		return reflect.ValueOf(a).Len() == c
-	}, "HaveLen")(c)
-}
-
-func MatcherWith[A any, E any](match func(a A, e E) bool, name string) func(e E) Matcher[A] {
-	return func(expected E) Matcher[A] {
-		return &matcher[A, E]{
-			name:     name,
-			match:    match,
-			expected: expected,
-		}
-	}
-}
-
-func Not[A any](matcher Matcher[A]) Matcher[A] {
-	return &negativeMatcher[A]{
-		Matcher: matcher,
-	}
-}
-
-type negativeMatcher[A any] struct {
-	Matcher[A]
-}
-
-func (m *negativeMatcher[A]) Negative() bool {
-	return true
-}
-
-type Matcher[A any] interface {
-	Name() string
-	Expected() any
-	Negative() bool
-	Match(actual A) bool
-}
-
-type matcher[A any, E any] struct {
-	name     string
-	match    func(a A, e E) bool
-	expected E
-}
-
-func (m *matcher[A, E]) Match(actual A) bool {
-	return m.match(actual, m.expected)
-}
-
-func (m *matcher[A, E]) Negative() bool {
-	return false
-}
-
-func (m *matcher[A, E]) Name() string {
-	return m.name
-}
-
-func (m *matcher[A, E]) Expected() any {
-	return m.expected
+	})(c)
 }
