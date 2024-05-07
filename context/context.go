@@ -33,6 +33,7 @@ func New[T any](optFns ...OptionFunc[T]) Context[T] {
 type Context[T any] interface {
 	Inject(ctx context.Context, value T) context.Context
 	From(ctx context.Context) T
+	MayFrom(ctx context.Context) (T, bool)
 }
 
 type ctx[T any] struct {
@@ -51,4 +52,11 @@ func (c *ctx[T]) From(ctx context.Context) T {
 		return c.defaultsFunc()
 	}
 	panic(errors.Errorf("%T not found in context", c))
+}
+
+func (c *ctx[T]) MayFrom(ctx context.Context) (T, bool) {
+	if v, ok := ctx.Value(c).(T); ok {
+		return v, true
+	}
+	return *new(T), false
 }
