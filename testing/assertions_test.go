@@ -4,6 +4,8 @@ import (
 	"strings"
 	"testing"
 
+	"golang.org/x/tools/txtar"
+
 	"slices"
 
 	. "github.com/octohelm/x/testing"
@@ -63,6 +65,19 @@ func Test(t *testing.T) {
 		pr := ProjectRoot()
 		Expect(t, pr,
 			HaveStringSuffix("/x"),
+		)
+	})
+
+	t.Run("Should match snapshot", func(t *testing.T) {
+		a := &txtar.Archive{
+			Files: []txtar.File{{
+				Name: "1.txt",
+				Data: []byte(`123`),
+			}},
+		}
+
+		Expect(t, a,
+			MatchSnapshot("x"),
 		)
 	})
 }

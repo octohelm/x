@@ -33,17 +33,26 @@ func assert[A any](t testing.TB, actual A, m Matcher[A]) {
 
 func failureMessage[A any](actual A, m Matcher[A]) string {
 	if m.Negative() {
+		if f, ok := m.(ExpectedFormatter); ok {
+			return format.MessageWithDiff(
+				m.FormatActual(actual),
+				fmt.Sprintf("Should not %s", m.Name()),
+				f.FormatExpected(),
+			)
+		}
+
+		return format.Message(actual, fmt.Sprintf("Should not %s", m.Name()))
+	}
+
+	if f, ok := m.(ExpectedFormatter); ok {
 		return format.MessageWithDiff(
-			fmt.Sprintf("%v", actual),
-			fmt.Sprintf("Should not %s", m.Name()),
-			fmt.Sprintf("%v", m.Expected()),
+			m.FormatActual(actual),
+			fmt.Sprintf("Should %s", m.Name()),
+			f.FormatExpected(),
 		)
 	}
-	return format.MessageWithDiff(
-		fmt.Sprintf("%v", actual),
-		fmt.Sprintf("Should %s", m.Name()),
-		fmt.Sprintf("%v", m.Expected()),
-	)
+
+	return format.Message(actual, fmt.Sprintf("Should %s", m.Name()))
 }
 
 func init() {

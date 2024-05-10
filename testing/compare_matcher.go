@@ -1,5 +1,7 @@
 package testing
 
+import "fmt"
+
 func NewCompareMatcher[A any, E any](name string, match func(a A, e E) bool) func(e E) Matcher[A] {
 	return func(expected E) Matcher[A] {
 		return &compareMatcher[A, E]{
@@ -28,6 +30,12 @@ func (m *compareMatcher[A, E]) Name() string {
 	return m.name
 }
 
-func (m *compareMatcher[A, E]) Expected() any {
-	return m.expected
+func (m *compareMatcher[A, E]) FormatActual(actual A) string {
+	return fmt.Sprintf("%v", actual)
 }
+
+func (m *compareMatcher[A, E]) FormatExpected() string {
+	return fmt.Sprintf("%v", m.expected)
+}
+
+var _ ExpectedFormatter = &compareMatcher[any, any]{}
