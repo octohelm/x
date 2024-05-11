@@ -1,12 +1,11 @@
 package testing_test
 
 import (
+	"slices"
 	"strings"
 	"testing"
 
 	"golang.org/x/tools/txtar"
-
-	"slices"
 
 	. "github.com/octohelm/x/testing"
 )

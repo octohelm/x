@@ -30,8 +30,10 @@ func (d *Duration) UnmarshalText(data []byte) error {
 	return nil
 }
 
-type NamedString string
-type NamedInt int
+type (
+	NamedString string
+	NamedInt    int
+)
 
 var longBytes = strings.Join(slices.Map(make([]string, 1025), func(e string) string {
 	return "1"
@@ -195,7 +197,7 @@ var cases = []struct {
 
 func BenchmarkPtrFloat(b *testing.B) {
 	v.PtrFloat = ptr.Float32(1.1)
-	//rv := reflect.ValueOf(v.PtrFloat).Elem()
+	// rv := reflect.ValueOf(v.PtrFloat).Elem()
 
 	b.Run("append", func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
@@ -205,7 +207,7 @@ func BenchmarkPtrFloat(b *testing.B) {
 			strconv.AppendFloat(d, float64(*v.PtrFloat), 'f', -1, 32)
 		}
 
-		//fmt.Println(string(d))
+		// fmt.Println(string(d))
 	})
 
 	b.Run("format", func(b *testing.B) {
@@ -214,7 +216,7 @@ func BenchmarkPtrFloat(b *testing.B) {
 			//_, _ = MarshalText(v.PtrFloat)
 			_ = []byte(strconv.FormatFloat(float64(*v.PtrFloat), 'f', -1, 32))
 		}
-		//fmt.Println(string(d))
+		// fmt.Println(string(d))
 	})
 }
 
