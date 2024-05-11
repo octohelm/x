@@ -5,26 +5,47 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"golang.org/x/tools/txtar"
 )
 
-func MatchSnapshot(name string) Matcher[*txtar.Archive] {
+var updateSnapshots string
+
+func init() {
+	updateSnapshots = os.Getenv("UPDATE_SNAPSHOTS")
+}
+
+func WithSnapshotUpdate() func(m *snapshotMatcher) {
+	return func(m *snapshotMatcher) {
+		m.update = true
+	}
+}
+
+func MatchSnapshot(name string, optionFuncs ...func(m *snapshotMatcher)) Matcher[*txtar.Archive] {
 	// testdata/__snapshots__/<name>.txtar
 
 	snapshotFilename := fmt.Sprintf("testdata/__snapshots__/%s.txtar", name)
 
 	snapshot, _ := os.ReadFile(snapshotFilename)
 
-	return &snapshotMatcher{
+	m := &snapshotMatcher{
 		filename: snapshotFilename,
 		expected: snapshot,
+		update:   updateSnapshots == "ALL" || strings.Contains(updateSnapshots, name),
 	}
+
+	for _, fn := range optionFuncs {
+		fn(m)
+	}
+
+	return m
 }
 
 type snapshotMatcher struct {
 	filename string
 	expected []byte
+	update   bool
 }
 
 func (s snapshotMatcher) Name() string {
@@ -45,7 +66,7 @@ func (s snapshotMatcher) FormatActual(a *txtar.Archive) string {
 
 func (s snapshotMatcher) Match(a *txtar.Archive) bool {
 	data := txtar.Format(a)
-	if len(s.expected) == 0 {
+	if s.update || len(s.expected) == 0 {
 		_ = os.MkdirAll(filepath.Dir(s.filename), os.ModePerm)
 		_ = os.WriteFile(s.filename, data, 0o644)
 		return true
