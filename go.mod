@@ -9,6 +9,7 @@ require (
 )
 
 require (
+	github.com/go-json-experiment/json v0.0.0-20240418180308-af2d5061e6c2
 	github.com/google/go-cmp v0.6.0 // indirect
 	golang.org/x/mod v0.17.0 // indirect
 	golang.org/x/net v0.24.0 // indirect
