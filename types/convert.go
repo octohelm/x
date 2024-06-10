@@ -61,6 +61,17 @@ func PtrTo(t Type) Type {
 	return nil
 }
 
+func typesChanDirFromReflectChan(cd reflect.ChanDir) types.ChanDir {
+	switch cd {
+	case reflect.SendDir:
+		return types.SendOnly
+	case reflect.RecvDir:
+		return types.RecvOnly
+	default:
+		return types.SendRecv
+	}
+}
+
 func NewTypesTypeFromReflectType(rtype reflect.Type) types.Type {
 	underlying := func() types.Type {
 		switch rtype.Kind() {
@@ -71,7 +82,7 @@ func NewTypesTypeFromReflectType(rtype reflect.Type) types.Type {
 		case reflect.Map:
 			return types.NewMap(NewTypesTypeFromReflectType(rtype.Key()), NewTypesTypeFromReflectType(rtype.Elem()))
 		case reflect.Chan:
-			return types.NewChan(types.ChanDir(rtype.ChanDir()), NewTypesTypeFromReflectType(rtype.Elem()))
+			return types.NewChan(typesChanDirFromReflectChan(rtype.ChanDir()), NewTypesTypeFromReflectType(rtype.Elem()))
 		case reflect.Func:
 			params := make([]*types.Var, rtype.NumIn())
 			for i := range params {
