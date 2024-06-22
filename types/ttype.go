@@ -333,18 +333,25 @@ func (ttype *TType) Name() string {
 	case *types.Named:
 		b := strings.Builder{}
 		b.WriteString(t.Obj().Name())
+
 		typeParams := t.TypeParams()
+
 		if n := typeParams.Len(); n > 0 {
 			b.WriteString("[")
 			for i := 0; i < n; i++ {
 				if i > 0 {
 					b.WriteString(",")
 				}
-				a := typeParams.At(i).Constraint().(*types.Interface)
-				if a.NumEmbeddeds() > 0 {
-					b.WriteString(typeString(FromTType(a.EmbeddedType(0))))
+
+				if typeArgs := t.TypeArgs(); typeArgs != nil {
+					b.WriteString(typeString(FromTType(typeArgs.At(i))))
 				} else {
-					b.WriteString(typeString(FromTType(a)))
+					a := typeParams.At(i).Constraint().(*types.Interface)
+					if a.NumEmbeddeds() > 0 {
+						b.WriteString(typeString(FromTType(a.EmbeddedType(0))))
+					} else {
+						b.WriteString(typeString(FromTType(typeParams.At(i).Underlying())))
+					}
 				}
 			}
 			b.WriteString("]")

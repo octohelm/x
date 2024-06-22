@@ -106,6 +106,7 @@ func check(t *testing.T, v any) {
 	if !ok {
 		rtype = reflect.TypeOf(v)
 	}
+
 	ttype := NewTypesTypeFromReflectType(rtype)
 
 	rt := FromRType(rtype)
