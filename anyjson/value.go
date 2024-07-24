@@ -24,6 +24,14 @@ func MustFromValue(value any) Valuer {
 	return x
 }
 
+func As[T Valuer](valuer T, target any) error {
+	raw, err := valuer.MarshalJSON()
+	if err != nil {
+		return err
+	}
+	return json.Unmarshal(raw, target)
+}
+
 func FromValue(value any) (Valuer, error) {
 	if value == nil {
 		return &Null{}, nil
