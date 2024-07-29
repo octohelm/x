@@ -7,6 +7,10 @@ import (
 	"github.com/octohelm/x/ptr"
 )
 
+func BooleanOf(b bool) *Boolean {
+	return &Boolean{value: &b}
+}
+
 type Boolean struct {
 	raw   []byte
 	value *bool

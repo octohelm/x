@@ -7,12 +7,15 @@ import (
 )
 
 func TestMerge(t *testing.T) {
-	base := MustFromValue(Obj{
-		"int": 1,
-		"str": "string",
-	}).(*Object)
-
 	t.Run("normal merge", func(t *testing.T) {
+		base := MustFromValue(Obj{
+			"int": 1,
+			"str": "string",
+			"arr": List{
+				"1", "2",
+			},
+		}).(*Object)
+
 		patch := MustFromValue(Obj{
 			"str":    "changed",
 			"extra":  true,
@@ -23,6 +26,9 @@ func TestMerge(t *testing.T) {
 						"ignore": nil,
 					},
 				},
+			},
+			"arr": List{
+				"2", "3",
 			},
 		}).(*Object)
 
@@ -37,10 +43,18 @@ func TestMerge(t *testing.T) {
 					"b": Obj{},
 				},
 			},
+			"arr": List{
+				"2", "3",
+			},
 		}))
 	})
 
-	t.Run("nil remover", func(t *testing.T) {
+	t.Run("nil as remover", func(t *testing.T) {
+		base := MustFromValue(Obj{
+			"int": 1,
+			"str": "string",
+		}).(*Object)
+
 		patch := MustFromValue(Obj{
 			"str": nil,
 		}).(*Object)
@@ -62,6 +76,10 @@ func TestMerge(t *testing.T) {
 				"name":  "b",
 				"value": "x",
 			},
+			Obj{
+				"name":  "d",
+				"value": "x",
+			},
 		})
 
 		patch := MustFromValue(List{
@@ -72,6 +90,10 @@ func TestMerge(t *testing.T) {
 			Obj{
 				"name":  "c",
 				"value": "new",
+			},
+			Obj{
+				"name":   "d",
+				"$patch": PatchOpDelete,
 			},
 		})
 

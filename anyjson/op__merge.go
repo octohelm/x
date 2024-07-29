@@ -1,35 +1,14 @@
 package anyjson
 
-type MergeOption = func(*merger)
-
-type NullOp int
-
-const (
-	NullIgnore NullOp = iota
-	NullAsRemover
-)
-
-func WithNullOp(op NullOp) MergeOption {
-	return func(m *merger) {
-		m.nullOp = op
-	}
+type MergeOption interface {
+	ApplyToMerge(m *merger)
 }
 
-func WithEmptyObjectAsNull() MergeOption {
-	return func(m *merger) {
-		m.emptyObjectAsNull = true
-	}
-}
-
-func WithArrayMergeKey(key string) MergeOption {
-	return func(m *merger) {
-		m.arrayMergeKey = key
-	}
-}
-
-func Merge[T Valuer](base T, patch T, optFns ...MergeOption) T {
+func Merge[T Valuer](base T, patch T, opts ...MergeOption) T {
 	m := &merger{}
-	m.Build(optFns...)
+	for _, opt := range opts {
+		opt.ApplyToMerge(m)
+	}
 
 	switch x := any(patch).(type) {
 	case *Object:
@@ -53,12 +32,6 @@ type merger struct {
 	arrayMergeKey     string
 	nullOp            NullOp
 	emptyObjectAsNull bool
-}
-
-func (m *merger) Build(optFns ...MergeOption) {
-	for _, fn := range optFns {
-		fn(m)
-	}
 }
 
 func (m *merger) maybeClone(valuer Valuer) Valuer {
@@ -159,11 +132,25 @@ func (m *merger) mergeArray(left *Array, right *Array) *Array {
 			if leftItemObj, ok := leftItem.(*Object); ok {
 				if value, ok := leftItemObj.Get(arrayMergeKey); ok {
 					if idx, found := findRightItemObjByValue(value); found != nil {
+						obj := found.(*Object)
 						processed[idx] = true
-						mergedArr.Append(m.mergeObject(leftItemObj, found.(*Object)))
+
+						if op, ok := IsPatchObject(obj); ok {
+							switch op {
+							case PatchOpReplace:
+								mergedArr.Append(m.maybeClone(obj))
+							case PatchOpDelete:
+								continue
+							}
+						}
+
+						mergedArr.Append(m.mergeObject(leftItemObj, obj))
 						continue
 					}
 				}
+			} else {
+				// when not object, array item should not use the left
+				continue
 			}
 
 			mergedArr.Append(m.maybeClone(leftItem))

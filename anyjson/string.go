@@ -5,6 +5,10 @@ import (
 	"strconv"
 )
 
+func StringOf(v string) *String {
+	return &String{value: &v}
+}
+
 type String struct {
 	value *string
 	raw   []byte

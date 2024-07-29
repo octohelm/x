@@ -116,3 +116,11 @@ func (v *Array) String() string {
 func (v *Array) Append(item Valuer) {
 	v.items = append(v.items, item)
 }
+
+func (v *Array) Index(i int) (Valuer, bool) {
+	if i < 0 || i >= len(v.items) {
+		return nil, false
+	}
+
+	return v.items[i], true
+}
