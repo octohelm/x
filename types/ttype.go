@@ -8,10 +8,19 @@ import (
 )
 
 func FromTType(ttype types.Type) *TType {
-	if tp, ok := ttype.(*types.TypeParam); ok {
-		return &TType{Type: tp.Constraint()}
+	switch x := ttype.(type) {
+	case *types.Alias:
+		return &TType{
+			Type: x.Rhs(),
+		}
+	case *types.TypeParam:
+		return &TType{
+			Type: x.Constraint(),
+		}
 	}
-	return &TType{Type: ttype}
+	return &TType{
+		Type: ttype,
+	}
 }
 
 type TType struct {
@@ -358,7 +367,13 @@ func (ttype *TType) Name() string {
 		}
 		return b.String()
 	case *types.Basic:
-		return t.Name()
+		kind := ttype.Kind()
+
+		if kind == reflect.UnsafePointer {
+			return "Pointer"
+		}
+
+		return kind.String()
 	}
 	return ""
 }
