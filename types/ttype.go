@@ -10,9 +10,7 @@ import (
 func FromTType(ttype types.Type) *TType {
 	switch x := ttype.(type) {
 	case *types.Alias:
-		return &TType{
-			Type: x.Rhs(),
-		}
+		return FromTType(x.Rhs())
 	case *types.TypeParam:
 		return &TType{
 			Type: x.Constraint(),
