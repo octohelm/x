@@ -112,8 +112,12 @@ func (m *merger) mergeObject(left *Object, right *Object) Valuer {
 func (m *merger) mergeArray(left *Array, right *Array) *Array {
 	if arrayMergeKey := m.arrayMergeKey; arrayMergeKey != "" {
 		mergedArr := &Array{}
-
 		processed := map[int]bool{}
+
+		reset := func() {
+			mergedArr = &Array{}
+			processed = map[int]bool{}
+		}
 
 		findRightItemObjByValue := func(leftItemMergeKeyValue Valuer) (int, Valuer) {
 			for i, item := range right.IndexedValues() {
@@ -128,6 +132,7 @@ func (m *merger) mergeArray(left *Array, right *Array) *Array {
 			return 0, nil
 		}
 
+	MergeWithMergeKey:
 		for leftItem := range left.Values() {
 			if leftItemObj, ok := leftItem.(*Object); ok {
 				if value, ok := leftItemObj.Get(arrayMergeKey); ok {
@@ -147,10 +152,13 @@ func (m *merger) mergeArray(left *Array, right *Array) *Array {
 						mergedArr.Append(m.mergeObject(leftItemObj, obj))
 						continue
 					}
+				} else {
+					reset()
+					break MergeWithMergeKey
 				}
 			} else {
-				// when not object, array item should not use the left
-				continue
+				reset()
+				break MergeWithMergeKey
 			}
 
 			mergedArr.Append(m.maybeClone(leftItem))
