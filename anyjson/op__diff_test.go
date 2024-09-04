@@ -33,43 +33,64 @@ func TestDiff(t *testing.T) {
 
 	t.Run("array object diff", func(t *testing.T) {
 		t.Run("array object merge", func(t *testing.T) {
-			base := MustFromValue(List{
-				Obj{
-					"name":  "a",
-					"value": "x",
+			base := MustFromValue(Obj{
+				"withMergeKey": List{
+					Obj{
+						"name":  "a",
+						"value": "x",
+					},
+					Obj{
+						"name":  "b",
+						"value": "x",
+					},
 				},
-				Obj{
-					"name":  "b",
-					"value": "x",
+				"withoutMergeKey": List{
+					Obj{
+						"value": "1",
+					},
 				},
-			}).(*Array)
+			}).(*Object)
 
-			target := MustFromValue(List{
-				Obj{
-					"name":  "a",
-					"value": "patched",
+			target := MustFromValue(Obj{
+				"withMergeKey": List{
+					Obj{
+						"name":  "a",
+						"value": "patched",
+					},
+					Obj{
+						"name":  "c",
+						"value": "new",
+					},
 				},
-				Obj{
-					"name":  "c",
-					"value": "new",
+				"withoutMergeKey": List{
+					Obj{
+						"value": "2",
+					},
 				},
-			}).(*Array)
+			}).(*Object)
 
 			diffed, err := Diff(base, target)
 			testingx.Expect(t, err, testingx.Be[error](nil))
 
-			testingx.Expect(t, diffed.Value(), testingx.Equal[any](List{
-				Obj{
-					"name":  "a",
-					"value": "patched",
+			testingx.Expect(t, diffed.Value(), testingx.Equal[any](Obj{
+				"withMergeKey": List{
+					Obj{
+						"name":  "a",
+						"value": "patched",
+					},
+					Obj{
+						"$patch": "delete",
+						"name":   "b",
+					},
+					Obj{
+						"name":  "c",
+						"value": "new",
+					},
 				},
-				Obj{
-					"$patch": "delete",
-					"name":   "b",
-				},
-				Obj{
-					"name":  "c",
-					"value": "new",
+				"withoutMergeKey": List{
+					Obj{
+						"value": "2",
+					},
 				},
 			}))
 		})

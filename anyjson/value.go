@@ -5,6 +5,7 @@ import (
 	jsonv1 "encoding/json"
 	"fmt"
 	"io"
+	"reflect"
 	"sort"
 
 	"github.com/go-json-experiment/json"
@@ -13,7 +14,7 @@ import (
 )
 
 func Equal(a Valuer, b Valuer) bool {
-	return a.Value() == b.Value()
+	return reflect.DeepEqual(a.Value(), b.Value())
 }
 
 func MustFromValue(value any) Valuer {

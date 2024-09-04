@@ -160,15 +160,16 @@ func (d *differ) diffArray(left *Array, right *Array) Valuer {
 					o := &Object{}
 					o.Set(arrayMergeKey, mergeKeyValue)
 					o.Set(PatchKey, StringOf(string(PatchOpDelete)))
+
 					mergedArr.Append(o)
 
 					continue
+				} else {
+					return d.diffFullArray(left, right)
 				}
 			} else {
 				return d.diffFullArray(left, right)
 			}
-
-			mergedArr.Append(d.maybeClone(leftItem))
 		}
 
 		for idx, item := range right.IndexedValues() {
