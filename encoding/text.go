@@ -10,7 +10,6 @@ import (
 	"strconv"
 
 	reflectx "github.com/octohelm/x/reflect"
-	pkgerrors "github.com/pkg/errors"
 )
 
 func MarshalText(v any) ([]byte, error) {
@@ -112,7 +111,7 @@ func UnmarshalText(v any, data []byte) error {
 		if rv.CanInterface() {
 			if textUnmarshaler, ok := rv.Interface().(encoding.TextUnmarshaler); ok {
 				if err := textUnmarshaler.UnmarshalText(data); err != nil {
-					return pkgerrors.Wrapf(err, "unmarshal text to %T failed", v)
+					return fmt.Errorf("unmarshal text to failed: %w: %T", err, v)
 				}
 				return nil
 			}
@@ -123,7 +122,7 @@ func UnmarshalText(v any, data []byte) error {
 
 	if textUnmarshaler, ok := v.(encoding.TextUnmarshaler); ok {
 		if err := textUnmarshaler.UnmarshalText(data); err != nil {
-			return pkgerrors.Wrapf(err, "unmarshal text to %T failed", v)
+			return fmt.Errorf("unmarshal failed: %w: text to %T failed", err, v)
 		}
 		return nil
 	}
@@ -144,79 +143,79 @@ func UnmarshalText(v any, data []byte) error {
 	case *bool:
 		v, err := strconv.ParseBool(string(data))
 		if err != nil {
-			return pkgerrors.Wrapf(err, "unmarshal text")
+			return fmt.Errorf("unmarshal text failed: %w", err)
 		}
 		*x = v
 	case *int:
 		i, err := strconv.ParseInt(string(data), 10, 64)
 		if err != nil {
-			return pkgerrors.Wrap(err, "unmarshal text")
+			return fmt.Errorf("unmarshal text failed: %w", err)
 		}
 		*x = int(i)
 	case *int8:
 		i, err := strconv.ParseInt(string(data), 10, 64)
 		if err != nil {
-			return pkgerrors.Wrap(err, "unmarshal text")
+			return fmt.Errorf("unmarshal text failed: %w", err)
 		}
 		*x = int8(i)
 	case *int16:
 		i, err := strconv.ParseInt(string(data), 10, 64)
 		if err != nil {
-			return pkgerrors.Wrap(err, "unmarshal text")
+			return fmt.Errorf("unmarshal text failed: %w", err)
 		}
 		*x = int16(i)
 	case *int32:
 		i, err := strconv.ParseInt(string(data), 10, 64)
 		if err != nil {
-			return pkgerrors.Wrap(err, "unmarshal text")
+			return fmt.Errorf("unmarshal text failed: %w", err)
 		}
 		*x = int32(i)
 	case *int64:
 		i, err := strconv.ParseInt(string(data), 10, 64)
 		if err != nil {
-			return pkgerrors.Wrap(err, "unmarshal text")
+			return fmt.Errorf("unmarshal text failed: %w", err)
 		}
 		*x = i
 	case *uint:
 		i, err := strconv.ParseUint(string(data), 10, 64)
 		if err != nil {
-			return pkgerrors.Wrap(err, "unmarshal text")
+			return fmt.Errorf("unmarshal text failed: %w", err)
 		}
 		*x = uint(i)
 	case *uint8:
 		i, err := strconv.ParseUint(string(data), 10, 64)
 		if err != nil {
-			return pkgerrors.Wrap(err, "unmarshal text")
+			return fmt.Errorf("unmarshal text failed: %w", err)
 		}
 		*x = uint8(i)
 	case *uint16:
 		i, err := strconv.ParseUint(string(data), 10, 64)
 		if err != nil {
-			return pkgerrors.Wrap(err, "unmarshal text")
+			return fmt.Errorf("unmarshal text failed: %w", err)
 		}
 		*x = uint16(i)
 	case *uint32:
 		i, err := strconv.ParseUint(string(data), 10, 64)
 		if err != nil {
-			return pkgerrors.Wrap(err, "unmarshal text")
+			return fmt.Errorf("unmarshal text failed: %w", err)
 		}
 		*x = uint32(i)
 	case *uint64:
 		i, err := strconv.ParseUint(string(data), 10, 64)
 		if err != nil {
-			return pkgerrors.Wrap(err, "unmarshal text")
+			return fmt.Errorf("unmarshal text failed: %w", err)
 		}
 		*x = i
 	case *float32:
 		i, err := strconv.ParseFloat(string(data), 32)
 		if err != nil {
-			return pkgerrors.Wrap(err, "unmarshal text")
+			return fmt.Errorf("unmarshal text failed: %w", err)
 		}
 		*x = float32(i)
 	case *float64:
 		i, err := strconv.ParseFloat(string(data), 64)
 		if err != nil {
-			return pkgerrors.Wrap(err, "unmarshal text")
+			return fmt.Errorf("unmarshal text failed: %w", err)
 		}
 		*x = i
 	default:
@@ -227,7 +226,7 @@ func UnmarshalText(v any, data []byte) error {
 
 func unmarshalTextToReflectValue(rv reflect.Value, data []byte) error {
 	if rv.Kind() != reflect.Ptr {
-		return pkgerrors.Errorf("unmarshal text need ptr value, but got %#v", rv.Interface())
+		return fmt.Errorf("unmarshal text need ptr value, but got %#v", rv.Interface())
 	}
 
 	for rv.Kind() == reflect.Ptr {
@@ -252,25 +251,25 @@ func unmarshalTextToReflectValue(rv reflect.Value, data []byte) error {
 	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
 		intV, err := strconv.ParseInt(string(data), 10, 64)
 		if err != nil {
-			return pkgerrors.Wrap(err, "unmarshal text")
+			return fmt.Errorf("unmarshal text failed: %w", err)
 		}
 		rv.SetInt(intV)
 	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
 		uintV, err := strconv.ParseUint(string(data), 10, 64)
 		if err != nil {
-			return pkgerrors.Wrap(err, "unmarshal text")
+			return fmt.Errorf("unmarshal text failed: %w", err)
 		}
 		rv.SetUint(uintV)
 	case reflect.Float32, reflect.Float64:
 		floatV, err := strconv.ParseFloat(string(data), 64)
 		if err != nil {
-			return pkgerrors.Wrap(err, "unmarshal text")
+			return fmt.Errorf("unmarshal text failed: %w", err)
 		}
 		rv.SetFloat(floatV)
 	case reflect.Bool:
 		boolV, err := strconv.ParseBool(string(data))
 		if err != nil {
-			return pkgerrors.Wrap(err, "unmarshal text")
+			return fmt.Errorf("unmarshal text failed: %w", err)
 		}
 		rv.SetBool(boolV)
 	}

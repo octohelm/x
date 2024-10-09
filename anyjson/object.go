@@ -2,13 +2,14 @@ package anyjson
 
 import (
 	"bytes"
+	"fmt"
 	"io"
 	"iter"
 	"strconv"
 
+	"errors"
 	"github.com/go-json-experiment/json"
 	jsonv1 "github.com/go-json-experiment/json/v1"
-	"github.com/pkg/errors"
 
 	"github.com/go-json-experiment/json/jsontext"
 )
@@ -105,7 +106,7 @@ func (v *Object) UnmarshalJSONV2(d *jsontext.Decoder, options json.Options) erro
 	if kind != '{' {
 		return &json.SemanticError{
 			JSONPointer: d.StackPointer(),
-			Err:         errors.Errorf("object should starts with `{`, but got `%s`", kind),
+			Err:         fmt.Errorf("object should starts with `{`, but got `%s`", kind),
 		}
 	}
 

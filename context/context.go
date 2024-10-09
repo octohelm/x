@@ -2,8 +2,7 @@ package context
 
 import (
 	"context"
-
-	"github.com/pkg/errors"
+	"fmt"
 )
 
 func WithDefaultsFunc[T any](defaultsFunc func() T) OptionFunc[T] {
@@ -51,7 +50,7 @@ func (c *ctx[T]) From(ctx context.Context) T {
 	if c.defaultsFunc != nil {
 		return c.defaultsFunc()
 	}
-	panic(errors.Errorf("%T not found in context", c))
+	panic(fmt.Errorf("%T not found in context", c))
 }
 
 func (c *ctx[T]) MayFrom(ctx context.Context) (T, bool) {

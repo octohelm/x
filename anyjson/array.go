@@ -2,12 +2,12 @@ package anyjson
 
 import (
 	"bytes"
+	"errors"
 	"io"
 	"iter"
 
 	"github.com/go-json-experiment/json/jsontext"
 	jsonv1 "github.com/go-json-experiment/json/v1"
-	"github.com/pkg/errors"
 )
 
 type Array struct {

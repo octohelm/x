@@ -1,11 +1,10 @@
 module github.com/octohelm/x
 
-go 1.23
+go 1.23.2
 
 require (
 	github.com/go-json-experiment/json v0.0.0-20240815175050-ebd3a8989ca1
 	github.com/onsi/gomega v1.34.2
-	github.com/pkg/errors v0.9.1
 	golang.org/x/tools v0.24.0
 )
 
