@@ -21,14 +21,14 @@ func assert[A any](t testing.TB, actual A, m Matcher[A]) {
 			return
 		}
 		t.Helper()
-		t.Fatalf("\n" + failureMessage(actual, m))
+		t.Fatal("\n" + failureMessage(actual, m))
 		return
 	}
 	if ok {
 		return
 	}
 	t.Helper()
-	t.Fatalf("\n" + failureMessage(actual, m))
+	t.Fatal("\n" + failureMessage(actual, m))
 }
 
 func failureMessage[A any](actual A, m Matcher[A]) string {
