@@ -13,7 +13,7 @@ func TestIndirect(t *testing.T) {
 	NewWithT(t).Expect(reflect.ValueOf(1).Interface()).To(Equal(Indirect(reflect.ValueOf(ptr.Int(1))).Interface()))
 	NewWithT(t).Expect(reflect.ValueOf(0).Interface()).To(Equal(Indirect(reflect.New(reflect.TypeOf(0))).Interface()))
 
-	rv := New(reflect.PtrTo(reflect.PtrTo(reflect.PtrTo(reflect.TypeOf("")))))
+	rv := New(reflect.PointerTo(reflect.PointerTo(reflect.PointerTo(reflect.TypeOf("")))))
 	NewWithT(t).Expect(reflect.ValueOf("").Interface()).To(Equal(Indirect(rv).Interface()))
 }
 
@@ -24,7 +24,7 @@ func (Zero) IsZero() bool {
 }
 
 func BenchmarkNew(b *testing.B) {
-	tpe := reflect.PtrTo(reflect.TypeOf(Zero("")))
+	tpe := reflect.PointerTo(reflect.TypeOf(Zero("")))
 
 	for i := 0; i < b.N; i++ {
 		_ = New(tpe)
@@ -32,7 +32,7 @@ func BenchmarkNew(b *testing.B) {
 }
 
 func BenchmarkIndirect(b *testing.B) {
-	x := New(reflect.PtrTo(reflect.TypeOf(Zero(""))))
+	x := New(reflect.PointerTo(reflect.TypeOf(Zero(""))))
 
 	for i := 0; i < b.N; i++ {
 		_ = Indirect(x)
@@ -48,14 +48,14 @@ func TestNew(t *testing.T) {
 	})
 
 	t.Run("NewPtrType", func(t *testing.T) {
-		tpe := reflect.PtrTo(reflect.TypeOf(Zero("")))
+		tpe := reflect.PointerTo(reflect.TypeOf(Zero("")))
 		z, ok := New(tpe).Interface().(*Zero)
 		NewWithT(t).Expect(ok).To(BeTrue())
 		NewWithT(t).Expect(*z).To(Equal(Zero("")))
 	})
 
 	t.Run("NewPtrPtrType", func(t *testing.T) {
-		tpe := reflect.PtrTo(reflect.PtrTo(reflect.TypeOf(Zero(""))))
+		tpe := reflect.PointerTo(reflect.PointerTo(reflect.TypeOf(Zero(""))))
 		z, ok := New(tpe).Interface().(**Zero)
 		NewWithT(t).Expect(ok).To(BeTrue())
 		NewWithT(t).Expect(**z).To(Equal(Zero("")))

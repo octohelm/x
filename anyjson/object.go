@@ -3,9 +3,11 @@ package anyjson
 import (
 	"bytes"
 	"fmt"
+	"github.com/octohelm/x/container/list"
 	"io"
 	"iter"
 	"strconv"
+	"sync/atomic"
 
 	"errors"
 	"github.com/go-json-experiment/json"
@@ -24,8 +26,16 @@ func (f *field) Set(v Valuer) {
 }
 
 type Object struct {
-	props map[string]*node[*field]
-	ll    list[*field]
+	props     map[string]*list.Element[*field]
+	ll        list.List[*field]
+	initialed atomic.Bool
+}
+
+func (v *Object) init() {
+	if !v.initialed.Swap(true) {
+		v.props = map[string]*list.Element[*field]{}
+		v.ll.Init()
+	}
 }
 
 func (v *Object) Value() any {
@@ -42,7 +52,7 @@ func (v *Object) Len() int {
 
 func (v *Object) KeyValues() iter.Seq2[string, Valuer] {
 	return func(yield func(string, Valuer) bool) {
-		for el := v.ll.Front; el != nil; el = el.Next {
+		for el := v.ll.Front(); el != nil; el = el.Next() {
 			if !yield(el.Value.key, el.Value.value) {
 				return
 			}
@@ -61,9 +71,7 @@ func (v *Object) Get(key string) (Valuer, bool) {
 }
 
 func (v *Object) Set(key string, value Valuer) bool {
-	if v.props == nil {
-		v.props = map[string]*node[*field]{}
-	}
+	v.init()
 
 	_, alreadyExist := v.props[key]
 	if alreadyExist {
@@ -178,64 +186,4 @@ func (v *Object) MarshalJSON() ([]byte, error) {
 
 func (v *Object) String() string {
 	return ToString(v)
-}
-
-type list[V any] struct {
-	Front, Back *node[V]
-}
-
-type node[V any] struct {
-	Value      V
-	Prev, Next *node[V]
-}
-
-func (l *list[V]) PushBack(v V) *node[V] {
-	n := &node[V]{
-		Value: v,
-	}
-	l.PushBackNode(n)
-	return n
-}
-
-func (l *list[V]) PushFront(v V) *node[V] {
-	n := &node[V]{
-		Value: v,
-	}
-	l.PushFrontNode(n)
-	return n
-}
-
-func (l *list[V]) PushBackNode(n *node[V]) {
-	n.Next = nil
-	n.Prev = l.Back
-	if l.Back != nil {
-		l.Back.Next = n
-	} else {
-		l.Front = n
-	}
-	l.Back = n
-}
-
-func (l *list[V]) PushFrontNode(n *node[V]) {
-	n.Next = l.Front
-	n.Prev = nil
-	if l.Front != nil {
-		l.Front.Prev = n
-	} else {
-		l.Back = n
-	}
-	l.Front = n
-}
-
-func (l *list[V]) Remove(n *node[V]) {
-	if n.Next != nil {
-		n.Next.Prev = n.Prev
-	} else {
-		l.Back = n.Prev
-	}
-	if n.Prev != nil {
-		n.Prev.Next = n.Next
-	} else {
-		l.Front = n.Next
-	}
 }

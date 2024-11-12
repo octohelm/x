@@ -5,7 +5,10 @@ import (
 	"reflect"
 )
 
+var bytesType = reflect.TypeFor[[]byte]()
+
 func IsBytes(v any) bool {
+
 	switch v.(type) {
 	case []byte:
 		return true
@@ -21,8 +24,7 @@ func IsBytes(v any) bool {
 			t = reflect.TypeOf(v)
 		}
 
-		// []Unit8
-		return t.Kind() == reflect.Slice && t.Elem().Kind() == reflect.Uint8 && t.Elem().PkgPath() == ""
+		return bytesType == t || t.Kind() == reflect.Slice && t.Elem().Kind() == reflect.Uint8 && t.Elem().PkgPath() == ""
 	}
 }
 
