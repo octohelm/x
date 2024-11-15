@@ -49,6 +49,10 @@ func (Struct) String() string {
 	return ""
 }
 
+type Resource[ID any] struct {
+	ID ID `json:"c"`
+}
+
 type Part struct {
 	C string `json:"c"`
 }

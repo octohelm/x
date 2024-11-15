@@ -86,7 +86,10 @@ func TestType(t *testing.T) {
 		typ.Struct{},
 		struct{}{},
 		struct {
+			typ.Resource[typ.Int]
+
 			typ.Part
+
 			Part2  typ2.Part
 			a      string
 			A      string `json:"a"`
@@ -173,6 +176,22 @@ func check(t *testing.T, v any) {
 					NewWithT(t).Expect(rsf.Name()).To(Equal(tsf.Name()))
 					NewWithT(t).Expect(rsf.PkgPath()).To(Equal(tsf.PkgPath()))
 					NewWithT(t).Expect(FullTypeName(rsf.Type())).To(Equal(FullTypeName(tsf.Type())))
+
+					if rsf.Type().Kind() == reflect.Struct {
+						elmT := rsf.Type()
+
+						for i := 0; i < elmT.NumField(); i++ {
+							rsf := elmT.Field(i)
+							tsf := elmT.Field(i)
+
+							NewWithT(t).Expect(rsf.Anonymous()).To(Equal(tsf.Anonymous()))
+							NewWithT(t).Expect(rsf.Tag()).To(Equal(tsf.Tag()))
+							NewWithT(t).Expect(rsf.Name()).To(Equal(tsf.Name()))
+							NewWithT(t).Expect(rsf.PkgPath()).To(Equal(tsf.PkgPath()))
+							NewWithT(t).Expect(FullTypeName(rsf.Type())).To(Equal(FullTypeName(tsf.Type())))
+						}
+					}
+
 				})
 			}
 
