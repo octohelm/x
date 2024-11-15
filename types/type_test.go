@@ -2,6 +2,7 @@ package types
 
 import (
 	"encoding"
+	"fmt"
 	"go/types"
 	"reflect"
 	"testing"
@@ -24,6 +25,7 @@ func TestType(t *testing.T) {
 		},
 		typ.AnySlice[string]{},
 		typ.AnyMap[int, string]{},
+		typ.AnyMap[int, fmt.Stringer]{},
 		typ.IntMap{},
 
 		typ.DeepCompose{},

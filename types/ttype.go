@@ -353,11 +353,15 @@ func (ttype *TType) Name() string {
 				if typeArgs := t.TypeArgs(); typeArgs != nil {
 					b.WriteString(typeString(FromTType(typeArgs.At(i))))
 				} else {
-					a := typeParams.At(i).Constraint().(*types.Interface)
-					if a.NumEmbeddeds() > 0 {
-						b.WriteString(typeString(FromTType(a.EmbeddedType(0))))
-					} else {
-						b.WriteString(typeString(FromTType(typeParams.At(i).Underlying())))
+					switch x := typeParams.At(i).Constraint().(type) {
+					case *types.Interface:
+						if x.NumEmbeddeds() > 0 {
+							b.WriteString(typeString(FromTType(x.EmbeddedType(0))))
+						} else {
+							b.WriteString(typeString(FromTType(typeParams.At(i).Underlying())))
+						}
+					default:
+						b.WriteString(typeString(FromTType(x)))
 					}
 				}
 			}
@@ -421,11 +425,15 @@ func ConstraintUnderlying(typeParamList *types.TypeParamList, underlying types.T
 
 	switch t := underlying.(type) {
 	case *types.TypeParam:
-		a := typeParamList.At(t.Index()).Constraint().(*types.Interface)
-		if a.NumEmbeddeds() > 0 {
-			return a.EmbeddedType(0)
+		switch x := typeParamList.At(t.Index()).Constraint().(type) {
+		case *types.Interface:
+			if x.NumEmbeddeds() > 0 {
+				return x.EmbeddedType(0)
+			}
+			return x
+		case *types.Named:
+			return x
 		}
-		return a
 	case *types.Map:
 		return types.NewMap(
 			ConstraintUnderlying(typeParamList, t.Key()),
