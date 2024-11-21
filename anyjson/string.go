@@ -1,8 +1,9 @@
 package anyjson
 
 import (
-	"encoding/json"
 	"strconv"
+
+	"github.com/go-json-experiment/json"
 )
 
 func StringOf(v string) *String {

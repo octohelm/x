@@ -1,9 +1,9 @@
 package anyjson
 
 import (
-	"encoding/json"
 	"strconv"
 
+	"github.com/go-json-experiment/json"
 	"github.com/octohelm/x/ptr"
 )
 

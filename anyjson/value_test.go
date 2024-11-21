@@ -3,7 +3,7 @@ package anyjson
 import (
 	"testing"
 
-	jsonv1 "encoding/json"
+	"github.com/go-json-experiment/json"
 	testingx "github.com/octohelm/x/testing"
 )
 
@@ -44,7 +44,7 @@ func TestFrom(t *testing.T) {
 func TestUnmarshal(t *testing.T) {
 	var obj Object
 
-	err := jsonv1.Unmarshal([]byte(`
+	err := json.Unmarshal([]byte(`
 {  
     "employees": [
 		{  

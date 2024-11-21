@@ -2,7 +2,6 @@ package anyjson
 
 import (
 	"bytes"
-	jsonv1 "encoding/json"
 	"fmt"
 	"io"
 	"reflect"
@@ -10,7 +9,9 @@ import (
 
 	"github.com/go-json-experiment/json"
 	"github.com/go-json-experiment/json/jsontext"
+	jsonv1 "github.com/go-json-experiment/json/v1"
 	"github.com/octohelm/x/ptr"
+	"golang.org/x/sync/errgroup"
 )
 
 func Equal(a Valuer, b Valuer) bool {
@@ -96,23 +97,39 @@ func FromValue(value any) (Valuer, error) {
 	}
 
 	r, w := io.Pipe()
-	defer func() {
-		_ = r.Close()
-	}()
 
-	go func() {
-		defer func() {
-			_ = w.Close()
-		}()
+	eg := &errgroup.Group{}
 
-		// FIXME
-		// ,inline,omitempty in k8s types
-		if err := jsonv1.NewEncoder(w).Encode(value); err != nil {
-			//
-		}
-	}()
+	eg.Go(func() error {
+		defer w.Close()
+		return json.MarshalWrite(w, value, jsonv1.OmitEmptyWithLegacyDefinition(true))
+	})
 
-	return FromJSONTextDecoder(jsontext.NewDecoder(r))
+	p := &payload{}
+
+	eg.Go(func() error {
+		defer r.Close()
+		return json.UnmarshalRead(r, p, jsonv1.OmitEmptyWithLegacyDefinition(true))
+	})
+
+	if err := eg.Wait(); err != nil {
+		return nil, err
+	}
+
+	return p.Valuer, nil
+}
+
+type payload struct {
+	Valuer
+}
+
+func (p *payload) UnmarshalJSONV2(decoder *jsontext.Decoder, options json.Options) error {
+	v, err := FromJSONTextDecoder(decoder)
+	if err != nil {
+		return err
+	}
+	p.Valuer = v
+	return nil
 }
 
 type Valuer interface {
