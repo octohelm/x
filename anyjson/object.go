@@ -2,16 +2,15 @@ package anyjson
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
+	"github.com/go-json-experiment/json"
+	jsonv1 "github.com/go-json-experiment/json/v1"
 	"github.com/octohelm/x/container/list"
 	"io"
 	"iter"
 	"strconv"
 	"sync/atomic"
-
-	"errors"
-	"github.com/go-json-experiment/json"
-	jsonv1 "github.com/go-json-experiment/json/v1"
 
 	"github.com/go-json-experiment/json/jsontext"
 )
@@ -28,11 +27,11 @@ func (f *field) Set(v Valuer) {
 type Object struct {
 	props     map[string]*list.Element[*field]
 	ll        list.List[*field]
-	initialed atomic.Bool
+	initialed uint32
 }
 
 func (v *Object) init() {
-	if !v.initialed.Swap(true) {
+	if atomic.SwapUint32(&v.initialed, 1) == 0 {
 		v.props = map[string]*list.Element[*field]{}
 		v.ll.Init()
 	}
@@ -155,10 +154,18 @@ func (v *Object) UnmarshalJSONV2(d *jsontext.Decoder, options json.Options) erro
 }
 
 func (v *Object) UnmarshalJSON(b []byte) error {
-	return v.UnmarshalJSONV2(jsontext.NewDecoder(bytes.NewReader(b)), jsonv1.DefaultOptionsV1())
+	o := &Object{}
+
+	if err := o.UnmarshalJSONV2(jsontext.NewDecoder(bytes.NewReader(b)), jsonv1.OmitEmptyWithLegacyDefinition(true)); err != nil {
+		return err
+	}
+
+	*v = *o
+
+	return nil
 }
 
-func (v *Object) MarshalJSON() ([]byte, error) {
+func (v Object) MarshalJSON() ([]byte, error) {
 	b := bytes.NewBuffer(nil)
 
 	b.WriteString("{")
