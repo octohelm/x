@@ -1,9 +1,10 @@
-package anyjson
+package anyjson_test
 
 import (
 	"testing"
 
 	"github.com/go-json-experiment/json"
+	. "github.com/octohelm/x/anyjson"
 	testingx "github.com/octohelm/x/testing"
 )
 

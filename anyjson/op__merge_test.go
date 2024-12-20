@@ -1,8 +1,9 @@
-package anyjson
+package anyjson_test
 
 import (
 	"testing"
 
+	. "github.com/octohelm/x/anyjson"
 	testingx "github.com/octohelm/x/testing"
 )
 

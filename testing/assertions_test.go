@@ -5,8 +5,6 @@ import (
 	"strings"
 	"testing"
 
-	"golang.org/x/tools/txtar"
-
 	. "github.com/octohelm/x/testing"
 )
 
@@ -68,15 +66,9 @@ func Test(t *testing.T) {
 	})
 
 	t.Run("Should match snapshot", func(t *testing.T) {
-		a := &txtar.Archive{
-			Files: []txtar.File{{
-				Name: "1.txt",
-				Data: []byte(`123`),
-			}},
-		}
+		a := NewSnapshot().
+			With("1.txt", []byte(`123`))
 
-		Expect(t, a,
-			MatchSnapshot("x"),
-		)
+		Expect(t, a, MatchSnapshot("x"))
 	})
 }
