@@ -123,7 +123,7 @@ type payload struct {
 	Valuer
 }
 
-func (p *payload) UnmarshalJSONV2(decoder *jsontext.Decoder, options json.Options) error {
+func (p *payload) UnmarshalJSONFrom(decoder *jsontext.Decoder, options json.Options) error {
 	v, err := FromJSONTextDecoder(decoder)
 	if err != nil {
 		return err
@@ -133,7 +133,8 @@ func (p *payload) UnmarshalJSONV2(decoder *jsontext.Decoder, options json.Option
 }
 
 type Valuer interface {
-	json.MarshalerV1
+	json.Marshaler
+
 	fmt.Stringer
 
 	Value() any
@@ -148,13 +149,13 @@ func FromJSONTextDecoder(decoder *jsontext.Decoder) (Valuer, error) {
 	switch decoder.PeekKind() {
 	case '{':
 		o := &Object{}
-		if err := o.UnmarshalJSONV2(decoder, json.DefaultOptionsV2()); err != nil {
+		if err := o.UnmarshalJSONFrom(decoder, json.DefaultOptionsV2()); err != nil {
 			return nil, err
 		}
 		return o, nil
 	case '[':
 		arr := &Array{}
-		if err := arr.UnmarshalJSONV2(decoder, json.DefaultOptionsV2()); err != nil {
+		if err := arr.UnmarshalJSONFrom(decoder, json.DefaultOptionsV2()); err != nil {
 			return nil, err
 		}
 		return arr, nil

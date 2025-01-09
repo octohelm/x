@@ -97,9 +97,9 @@ func (v *Object) Delete(key string) (didDelete bool) {
 	return ok
 }
 
-var _ json.UnmarshalerV2 = &Object{}
+var _ json.UnmarshalerFrom = &Object{}
 
-func (v *Object) UnmarshalJSONV2(d *jsontext.Decoder, options json.Options) error {
+func (v *Object) UnmarshalJSONFrom(d *jsontext.Decoder, options json.Options) error {
 	t, err := d.ReadToken()
 	if err != nil {
 		if err == io.EOF {
@@ -156,7 +156,7 @@ func (v *Object) UnmarshalJSONV2(d *jsontext.Decoder, options json.Options) erro
 func (v *Object) UnmarshalJSON(b []byte) error {
 	o := &Object{}
 
-	if err := o.UnmarshalJSONV2(jsontext.NewDecoder(bytes.NewReader(b)), jsonv1.OmitEmptyWithLegacyDefinition(true)); err != nil {
+	if err := o.UnmarshalJSONFrom(jsontext.NewDecoder(bytes.NewReader(b)), jsonv1.OmitEmptyWithLegacyDefinition(true)); err != nil {
 		return err
 	}
 

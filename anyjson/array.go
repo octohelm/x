@@ -46,7 +46,7 @@ func (v *Array) IndexedValues() iter.Seq2[int, Valuer] {
 	}
 }
 
-func (v *Array) UnmarshalJSONV2(d *jsontext.Decoder, v1 jsonv1.Options) error {
+func (v *Array) UnmarshalJSONFrom(d *jsontext.Decoder, v1 jsonv1.Options) error {
 	if v == nil {
 		*v = Array{}
 	}
@@ -83,7 +83,7 @@ func (v *Array) UnmarshalJSONV2(d *jsontext.Decoder, v1 jsonv1.Options) error {
 
 func (v *Array) UnmarshalJSON(b []byte) error {
 	d := jsontext.NewDecoder(bytes.NewReader(b))
-	return v.UnmarshalJSONV2(d, jsonv1.DefaultOptionsV1())
+	return v.UnmarshalJSONFrom(d, jsonv1.DefaultOptionsV1())
 }
 
 func (v *Array) MarshalJSON() ([]byte, error) {
