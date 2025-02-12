@@ -29,8 +29,10 @@ func Test(t *testing.T) {
 		})
 
 		t.Run("Should Be", func(t *testing.T) {
-			Expect(t, error(nil),
-				Be[error](nil),
+			Expect(
+				t,
+				error(nil),
+				BeNil[error](),
 			)
 		})
 
