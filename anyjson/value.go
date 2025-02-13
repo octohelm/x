@@ -123,7 +123,9 @@ type payload struct {
 	Valuer
 }
 
-func (p *payload) UnmarshalJSONFrom(decoder *jsontext.Decoder, options json.Options) error {
+var _ json.UnmarshalerFrom = &payload{}
+
+func (p *payload) UnmarshalJSONFrom(decoder *jsontext.Decoder) error {
 	v, err := FromJSONTextDecoder(decoder)
 	if err != nil {
 		return err
@@ -149,13 +151,13 @@ func FromJSONTextDecoder(decoder *jsontext.Decoder) (Valuer, error) {
 	switch decoder.PeekKind() {
 	case '{':
 		o := &Object{}
-		if err := o.UnmarshalJSONFrom(decoder, json.DefaultOptionsV2()); err != nil {
+		if err := o.UnmarshalJSONFrom(decoder); err != nil {
 			return nil, err
 		}
 		return o, nil
 	case '[':
 		arr := &Array{}
-		if err := arr.UnmarshalJSONFrom(decoder, json.DefaultOptionsV2()); err != nil {
+		if err := arr.UnmarshalJSONFrom(decoder); err != nil {
 			return nil, err
 		}
 		return arr, nil

@@ -4,15 +4,15 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"github.com/go-json-experiment/json"
 	jsonv1 "github.com/go-json-experiment/json/v1"
-	"github.com/octohelm/x/container/list"
 	"io"
 	"iter"
 	"strconv"
 	"sync/atomic"
 
+	"github.com/go-json-experiment/json"
 	"github.com/go-json-experiment/json/jsontext"
+	"github.com/octohelm/x/container/list"
 )
 
 type field struct {
@@ -99,7 +99,7 @@ func (v *Object) Delete(key string) (didDelete bool) {
 
 var _ json.UnmarshalerFrom = &Object{}
 
-func (v *Object) UnmarshalJSONFrom(d *jsontext.Decoder, options json.Options) error {
+func (v *Object) UnmarshalJSONFrom(d *jsontext.Decoder) error {
 	t, err := d.ReadToken()
 	if err != nil {
 		if err == io.EOF {
@@ -156,7 +156,7 @@ func (v *Object) UnmarshalJSONFrom(d *jsontext.Decoder, options json.Options) er
 func (v *Object) UnmarshalJSON(b []byte) error {
 	o := &Object{}
 
-	if err := o.UnmarshalJSONFrom(jsontext.NewDecoder(bytes.NewReader(b)), jsonv1.OmitEmptyWithLegacyDefinition(true)); err != nil {
+	if err := o.UnmarshalJSONFrom(jsontext.NewDecoder(bytes.NewReader(b), jsonv1.OmitEmptyWithLegacyDefinition(true))); err != nil {
 		return err
 	}
 

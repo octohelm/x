@@ -6,6 +6,7 @@ import (
 	"io"
 	"iter"
 
+	"github.com/go-json-experiment/json"
 	"github.com/go-json-experiment/json/jsontext"
 	jsonv1 "github.com/go-json-experiment/json/v1"
 )
@@ -46,7 +47,9 @@ func (v *Array) IndexedValues() iter.Seq2[int, Valuer] {
 	}
 }
 
-func (v *Array) UnmarshalJSONFrom(d *jsontext.Decoder, v1 jsonv1.Options) error {
+var _ json.UnmarshalerFrom = &Array{}
+
+func (v *Array) UnmarshalJSONFrom(d *jsontext.Decoder) error {
 	if v == nil {
 		*v = Array{}
 	}
@@ -82,8 +85,8 @@ func (v *Array) UnmarshalJSONFrom(d *jsontext.Decoder, v1 jsonv1.Options) error 
 }
 
 func (v *Array) UnmarshalJSON(b []byte) error {
-	d := jsontext.NewDecoder(bytes.NewReader(b))
-	return v.UnmarshalJSONFrom(d, jsonv1.DefaultOptionsV1())
+	d := jsontext.NewDecoder(bytes.NewReader(b), jsonv1.DefaultOptionsV1())
+	return v.UnmarshalJSONFrom(d)
 }
 
 func (v *Array) MarshalJSON() ([]byte, error) {
