@@ -49,7 +49,7 @@ func TestType(t *testing.T) {
 		typ.Bool(true),
 		true,
 		typ.Int(0),
-		ptr.Int(1),
+		ptr.Ptr(1),
 		int(0),
 		typ.Int8(0),
 		int8(0),
@@ -193,7 +193,6 @@ func check(t *testing.T, v any) {
 							NewWithT(t).Expect(FullTypeName(rsf.Type())).To(Equal(FullTypeName(tsf.Type())))
 						}
 					}
-
 				})
 			}
 

@@ -1,5 +1,5 @@
 fmt:
-	gofumpt -w -l .
+	go tool gofumpt -w -l .
 
 test: tidy
 	CGO_ENABLED=0 go test -v -failfast ./...

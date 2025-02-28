@@ -9,9 +9,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/octohelm/x/slices"
-
 	"github.com/octohelm/x/ptr"
+	"github.com/octohelm/x/slices"
 	. "github.com/onsi/gomega"
 )
 
@@ -74,14 +73,14 @@ var cases = []struct {
 		"Ptr String",
 		rv.FieldByName("PtrString"),
 		"string",
-		ptr.String("string"),
+		ptr.Ptr("string"),
 	},
 	{
 		"Ptr Ptr String",
 		rv.FieldByName("PtrPtrString"),
 		"string",
 		func() **string {
-			s := ptr.String("string")
+			s := ptr.Ptr("string")
 			return &s
 		}(),
 	},
@@ -89,7 +88,7 @@ var cases = []struct {
 		"Ptr String raw value",
 		&v.String,
 		"ptr",
-		ptr.String("ptr"),
+		ptr.Ptr("ptr"),
 	},
 	{
 		"Named String",
@@ -125,7 +124,7 @@ var cases = []struct {
 		"PtrInt",
 		rv.FieldByName("PtrInt"),
 		"1",
-		ptr.Int(1),
+		ptr.Ptr(1),
 	},
 	{
 		"Uint",
@@ -137,13 +136,13 @@ var cases = []struct {
 		"Int raw value",
 		rv.FieldByName("Int").Addr().Interface(),
 		"1",
-		ptr.Int(1),
+		ptr.Ptr(1),
 	},
 	{
 		"PtrUint",
 		rv.FieldByName("PtrUint"),
 		"1",
-		ptr.Uint(1),
+		ptr.Ptr[uint](1),
 	},
 	{
 		"Float",
@@ -155,7 +154,7 @@ var cases = []struct {
 		"PtrFloat",
 		rv.FieldByName("PtrFloat"),
 		"1.1",
-		ptr.Float32(1.1),
+		ptr.Ptr[float32](1.1),
 	},
 	{
 		"Bool",
@@ -167,7 +166,7 @@ var cases = []struct {
 		"PtrBool",
 		rv.FieldByName("PtrBool"),
 		"true",
-		ptr.Bool(true),
+		ptr.Ptr(true),
 	},
 	{
 		"Bytes",
@@ -196,7 +195,7 @@ var cases = []struct {
 }
 
 func BenchmarkPtrFloat(b *testing.B) {
-	v.PtrFloat = ptr.Float32(1.1)
+	v.PtrFloat = ptr.Ptr[float32](1.1)
 	// rv := reflect.ValueOf(v.PtrFloat).Elem()
 
 	b.Run("append", func(b *testing.B) {

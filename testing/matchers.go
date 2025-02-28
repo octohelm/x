@@ -4,6 +4,8 @@ import (
 	"reflect"
 
 	reflectx "github.com/octohelm/x/reflect"
+	"github.com/octohelm/x/testing/internal"
+	"github.com/octohelm/x/testing/snapshot"
 )
 
 func NotBeNil[T any]() Matcher[T] {
@@ -11,19 +13,19 @@ func NotBeNil[T any]() Matcher[T] {
 }
 
 func BeNil[T any]() Matcher[T] {
-	return NewMatcher[T]("BeNil", func(a T) bool {
+	return internal.NewMatcher[T]("BeNil", func(a T) bool {
 		return any(a) == nil
 	})
 }
 
 func BeTrue() Matcher[bool] {
-	return NewMatcher[bool]("BeTrue", func(a bool) bool {
+	return internal.NewMatcher[bool]("BeTrue", func(a bool) bool {
 		return a
 	})
 }
 
 func BeFalse() Matcher[bool] {
-	return NewMatcher[bool]("BeFalse", func(a bool) bool {
+	return internal.NewMatcher[bool]("BeFalse", func(a bool) bool {
 		return !a
 	})
 }
@@ -33,7 +35,7 @@ func NotBeEmpty[T any]() Matcher[T] {
 }
 
 func BeEmpty[T any]() Matcher[T] {
-	return NewMatcher("BeEmpty", func(a T) bool {
+	return internal.NewMatcher("BeEmpty", func(a T) bool {
 		return reflectx.IsEmptyValue(a)
 	})
 }
@@ -43,17 +45,17 @@ func NotBe[T any](e T) Matcher[T] {
 }
 
 func Be[T any](e T) Matcher[T] {
-	return NewCompareMatcher[T, T]("Be", func(a T, e T) bool {
+	return internal.NewCompareMatcher[T, T]("Be", func(a T, e T) bool {
 		return any(a) == any(e)
 	})(e)
 }
 
 func NotEqual[T any](e T) Matcher[T] {
-	return Not(Equal[T](e))
+	return internal.Not(Equal[T](e))
 }
 
 func Equal[T any](e T) Matcher[T] {
-	return NewCompareMatcher[T, T]("Equal", func(a T, e T) bool {
+	return internal.NewCompareMatcher[T, T]("Equal", func(a T, e T) bool {
 		return reflect.DeepEqual(a, e)
 	})(e)
 }
@@ -76,4 +78,12 @@ func HaveLen[T any](c int) Matcher[T] {
 	return NewCompareMatcher[T, int]("HaveLen", func(a T, c int) bool {
 		return reflect.ValueOf(a).Len() == c
 	})(c)
+}
+
+func NewSnapshot() *snapshot.Snapshot {
+	return &snapshot.Snapshot{}
+}
+
+func MatchSnapshot(name string, options ...snapshot.Option) internal.Matcher[*snapshot.Snapshot] {
+	return snapshot.Match(name, options...)
 }

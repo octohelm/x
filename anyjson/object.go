@@ -4,11 +4,12 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	jsonv1 "github.com/go-json-experiment/json/v1"
 	"io"
 	"iter"
 	"strconv"
 	"sync/atomic"
+
+	jsonv1 "github.com/go-json-experiment/json/v1"
 
 	"github.com/go-json-experiment/json"
 	"github.com/go-json-experiment/json/jsontext"

@@ -8,7 +8,6 @@ import (
 var bytesType = reflect.TypeFor[[]byte]()
 
 func IsBytes(v any) bool {
-
 	switch v.(type) {
 	case []byte:
 		return true

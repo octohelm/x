@@ -6,7 +6,7 @@ func Sorted[T Valuer](v T) T {
 	switch x := any(v).(type) {
 	case *Object:
 		keys := slices.Sorted(func(yield func(string2 string) bool) {
-			for k, _ := range x.KeyValues() {
+			for k := range x.KeyValues() {
 				if !yield(k) {
 					return
 				}

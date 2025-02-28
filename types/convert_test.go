@@ -1,9 +1,10 @@
 package types
 
 import (
-	testingx "github.com/octohelm/x/testing"
 	"reflect"
 	"testing"
+
+	testingx "github.com/octohelm/x/testing"
 
 	. "github.com/onsi/gomega"
 )

@@ -10,7 +10,7 @@ import (
 )
 
 func TestIndirect(t *testing.T) {
-	NewWithT(t).Expect(reflect.ValueOf(1).Interface()).To(Equal(Indirect(reflect.ValueOf(ptr.Int(1))).Interface()))
+	NewWithT(t).Expect(reflect.ValueOf(1).Interface()).To(Equal(Indirect(reflect.ValueOf(ptr.Ptr(1))).Interface()))
 	NewWithT(t).Expect(reflect.ValueOf(0).Interface()).To(Equal(Indirect(reflect.New(reflect.TypeOf(0))).Interface()))
 
 	rv := New(reflect.PointerTo(reflect.PointerTo(reflect.PointerTo(reflect.TypeOf("")))))
@@ -82,7 +82,7 @@ var emptyValues = []any{
 
 var nonEmptyValues = []any{
 	Zero("11111111111"),
-	ptr.String("12322"),
+	ptr.Ptr("12322"),
 }
 
 func BenchmarkIsEmptyValue(b *testing.B) {

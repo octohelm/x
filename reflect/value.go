@@ -36,6 +36,10 @@ func Indirect(rv reflect.Value) reflect.Value {
 }
 
 func IsEmptyValue(v any) bool {
+	return IsZero(v)
+}
+
+func IsZero(v any) bool {
 	if rv, ok := v.(reflect.Value); ok {
 		if rv.Kind() == reflect.Ptr && rv.IsNil() {
 			return true

@@ -45,7 +45,7 @@ func TestIsBytes(t *testing.T) {
 }
 
 func TestFullTypeName(t *testing.T) {
-	NewWithT(t).Expect(FullTypeName(reflect.TypeOf(ptr.Int(1)))).To(Equal("*int"))
+	NewWithT(t).Expect(FullTypeName(reflect.TypeOf(ptr.Ptr(1)))).To(Equal("*int"))
 	NewWithT(t).Expect(FullTypeName(reflect.PtrTo(reflect.TypeOf(1)))).To(Equal("*int"))
 	NewWithT(t).Expect(FullTypeName(reflect.PtrTo(reflect.TypeOf(time.Now())))).To(Equal("*time.Time"))
 	NewWithT(t).Expect(FullTypeName(reflect.PtrTo(reflect.TypeOf(struct {
@@ -54,7 +54,7 @@ func TestFullTypeName(t *testing.T) {
 }
 
 func TestIndirectType(t *testing.T) {
-	NewWithT(t).Expect(reflect.TypeOf(1)).To(Equal(Deref(reflect.TypeOf(ptr.Int(1)))))
+	NewWithT(t).Expect(reflect.TypeOf(1)).To(Equal(Deref(reflect.TypeOf(ptr.Ptr(1)))))
 	NewWithT(t).Expect(reflect.TypeOf(1)).To(Equal(Deref(reflect.PtrTo(reflect.TypeOf(1)))))
 
 	tpe := reflect.TypeOf(1)
