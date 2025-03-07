@@ -36,6 +36,13 @@ func ErrorIs(expect error, err error) Checker {
 	return asChecker(matcher, err)
 }
 
+func HasError(err error) Checker {
+	matcher := internal.NewMatcher[error]("hash error", func(e error) bool {
+		return e != nil
+	})
+	return asChecker(matcher, err)
+}
+
 func NoError(err error) Checker {
 	matcher := internal.NewMatcher[error]("no error", func(e error) bool {
 		return e == nil

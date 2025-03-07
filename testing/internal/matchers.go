@@ -24,7 +24,7 @@ func BeTrue() Matcher[bool] {
 
 func BeFalse() Matcher[bool] {
 	return NewMatcher[bool]("be false", func(a bool) bool {
-		return a
+		return !a
 	})
 }
 
