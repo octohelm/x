@@ -2,6 +2,22 @@ package bdd
 
 import "encoding"
 
+func MustDo[T any](action func() (T, error)) T {
+	x, err := action()
+	if err != nil {
+		panic(err)
+	}
+	return x
+}
+
+func MustDo2[A any, B any](action func() (A, B, error)) (A, B) {
+	a, b, err := action()
+	if err != nil {
+		panic(err)
+	}
+	return a, b
+}
+
 func Must[T any](v T, err error) T {
 	if err != nil {
 		panic(err)
