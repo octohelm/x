@@ -69,7 +69,7 @@ type call[V any] struct {
 }
 
 type Group[K comparable] struct {
-	g Group2[K, struct{}]
+	g GroupValue[K, struct{}]
 }
 
 func (g *Group[K]) Do(key K, fn func() error) (error, bool) {
@@ -79,13 +79,19 @@ func (g *Group[K]) Do(key K, fn func() error) (error, bool) {
 	return err, shared
 }
 
+func (g *Group[K]) DoChan(key K, fn func() error) <-chan Result[struct{}] {
+	return g.g.DoChan(key, func() (struct{}, error) {
+		return struct{}{}, fn()
+	})
+}
+
 func (g *Group[K]) Forget(key K) {
 	g.g.Forget(key)
 }
 
-// Group2 represents a class of work and forms a namespace in
+// GroupValue represents a class of work and forms a namespace in
 // which units of work can be executed with duplicate suppression.
-type Group2[K comparable, V any] struct {
+type GroupValue[K comparable, V any] struct {
 	mu sync.Mutex     // protects m
 	m  map[K]*call[V] // lazily initialized
 }
@@ -103,7 +109,7 @@ type Result[V any] struct {
 // time. If a duplicate comes in, the duplicate caller waits for the
 // original to complete and receives the same results.
 // The return value shared indicates whether v was given to multiple callers.
-func (g *Group2[K, V]) Do(key K, fn func() (V, error)) (v V, err error, shared bool) {
+func (g *GroupValue[K, V]) Do(key K, fn func() (V, error)) (v V, err error, shared bool) {
 	g.mu.Lock()
 	if g.m == nil {
 		g.m = make(map[K]*call[V])
@@ -133,7 +139,7 @@ func (g *Group2[K, V]) Do(key K, fn func() (V, error)) (v V, err error, shared b
 // results when they are ready.
 //
 // The returned channel will not be closed.
-func (g *Group2[K, V]) DoChan(key K, fn func() (V, error)) <-chan Result[V] {
+func (g *GroupValue[K, V]) DoChan(key K, fn func() (V, error)) <-chan Result[V] {
 	ch := make(chan Result[V], 1)
 	g.mu.Lock()
 	if g.m == nil {
@@ -156,7 +162,7 @@ func (g *Group2[K, V]) DoChan(key K, fn func() (V, error)) <-chan Result[V] {
 }
 
 // doCall handles the single call for a key.
-func (g *Group2[K, V]) doCall(c *call[V], key K, fn func() (V, error)) {
+func (g *GroupValue[K, V]) doCall(c *call[V], key K, fn func() (V, error)) {
 	normalReturn := false
 	recovered := false
 
@@ -222,8 +228,12 @@ func (g *Group2[K, V]) doCall(c *call[V], key K, fn func() (V, error)) {
 // Forget tells the singleflight to forget about a key.  Future calls
 // to Do for this key will call the function rather than waiting for
 // an earlier call to complete.
-func (g *Group2[K, V]) Forget(key K) {
+func (g *GroupValue[K, V]) Forget(key K) {
 	g.mu.Lock()
 	delete(g.m, key)
 	g.mu.Unlock()
 }
+
+// Group2
+// Deprecated use GroupValue instead
+type Group2[K comparable, V any] = GroupValue[K, V]
