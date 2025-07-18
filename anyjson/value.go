@@ -102,14 +102,14 @@ func FromValue(value any) (Valuer, error) {
 
 	eg.Go(func() error {
 		defer w.Close()
-		return json.MarshalWrite(w, value, jsonv1.OmitEmptyWithLegacyDefinition(true))
+		return json.MarshalWrite(w, value, jsonv1.OmitEmptyWithLegacySemantics(true))
 	})
 
 	p := &payload{}
 
 	eg.Go(func() error {
 		defer r.Close()
-		return json.UnmarshalRead(r, p, jsonv1.OmitEmptyWithLegacyDefinition(true))
+		return json.UnmarshalRead(r, p, jsonv1.OmitEmptyWithLegacySemantics(true))
 	})
 
 	if err := eg.Wait(); err != nil {

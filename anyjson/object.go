@@ -157,7 +157,7 @@ func (v *Object) UnmarshalJSONFrom(d *jsontext.Decoder) error {
 func (v *Object) UnmarshalJSON(b []byte) error {
 	o := &Object{}
 
-	if err := o.UnmarshalJSONFrom(jsontext.NewDecoder(bytes.NewReader(b), jsonv1.OmitEmptyWithLegacyDefinition(true))); err != nil {
+	if err := o.UnmarshalJSONFrom(jsontext.NewDecoder(bytes.NewReader(b), jsonv1.OmitEmptyWithLegacySemantics(true))); err != nil {
 		return err
 	}
 

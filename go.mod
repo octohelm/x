@@ -5,11 +5,11 @@ go 1.24.5
 tool mvdan.cc/gofumpt
 
 require (
-	github.com/go-json-experiment/json v0.0.0-20250709061156-d2cd4771eb1b
+	github.com/go-json-experiment/json v0.0.0-20250714165856-be8212f5270d
 	github.com/onsi/gomega v1.37.0
 	golang.org/x/sync v0.16.0
 	golang.org/x/text v0.27.0
-	golang.org/x/tools v0.34.0
+	golang.org/x/tools v0.35.0
 )
 
 require (

@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"os"
+	"path"
 	"path/filepath"
 	"strings"
 
@@ -115,7 +116,7 @@ func (s *snapshotMatcher) Match(a *Snapshot) bool {
 func (s *snapshotMatcher) commitSnapshots(data []byte) error {
 	filename := s.filename
 	if s.wd != "" {
-		filename = filepath.Join(s.wd, filename)
+		filename = path.Join(s.wd, filename)
 	}
 	if err := os.MkdirAll(filepath.Dir(filename), os.ModePerm); err != nil {
 		return err
