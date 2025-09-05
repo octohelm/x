@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/onsi/gomega/format"
+	"github.com/google/go-cmp/cmp"
 )
 
 func Expect[A any](t testing.TB, actual A, m Matcher[A]) {
@@ -25,29 +25,24 @@ func Expect[A any](t testing.TB, actual A, m Matcher[A]) {
 }
 
 func failureMessage[A any](actual A, m Matcher[A]) string {
+	var v any = actual
+
+	if n, ok := m.(MatcherWithActualNormalizer[A]); ok {
+		v = n.NormalizeActual(actual)
+	}
+
 	if m.Negative() {
-		if f, ok := m.(ExpectedFormatter); ok {
-			return format.MessageWithDiff(
-				m.FormatActual(actual),
-				fmt.Sprintf("Should not %s", m.Name()),
-				f.FormatExpected(),
-			)
-		}
-
-		return format.Message(actual, fmt.Sprintf("Should not %s", m.Name()))
+		return fmt.Sprintf("should not %s, but got\n%s", m.Action(), maybeDiff(v, m))
 	}
 
-	if f, ok := m.(ExpectedFormatter); ok {
-		return format.MessageWithDiff(
-			m.FormatActual(actual),
-			fmt.Sprintf("Should %s", m.Name()),
-			f.FormatExpected(),
-		)
-	}
-
-	return format.Message(actual, fmt.Sprintf("Should %s", m.Name()))
+	return fmt.Sprintf("should %s, but got\n%s", m.Action(), maybeDiff(v, m))
 }
 
-func init() {
-	format.TruncateThreshold = 200
+func maybeDiff(actual any, m any) any {
+	if f, ok := m.(MatcherWithNormalizedExpected); ok {
+
+		return cmp.Diff(actual, f.NormalizedExpected())
+	}
+
+	return actual
 }

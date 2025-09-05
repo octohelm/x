@@ -1,4 +1,4 @@
-package types
+package types_test
 
 import (
 	"encoding"
@@ -9,9 +9,10 @@ import (
 	"unsafe"
 
 	"github.com/octohelm/x/ptr"
+	testingx "github.com/octohelm/x/testing"
+	. "github.com/octohelm/x/types"
 	"github.com/octohelm/x/types/testdata/typ"
 	typ2 "github.com/octohelm/x/types/testdata/typ/typ"
-	. "github.com/onsi/gomega"
 )
 
 func TestType(t *testing.T) {
@@ -118,66 +119,66 @@ func check(t *testing.T, v any) {
 	tt := FromTType(ttype)
 
 	t.Run(FullTypeName(rt), func(t *testing.T) {
-		NewWithT(t).Expect(rt.String()).To(Equal(tt.String()))
-		NewWithT(t).Expect(rt.Kind().String()).To(Equal(tt.Kind().String()))
-		NewWithT(t).Expect(rt.Name()).To(Equal(tt.Name()))
-		NewWithT(t).Expect(rt.PkgPath()).To(Equal(tt.PkgPath()))
-		NewWithT(t).Expect(rt.Comparable()).To(Equal(tt.Comparable()))
-		NewWithT(t).Expect(rt.AssignableTo(FromRType(reflect.TypeOf("")))).To(Equal(tt.AssignableTo(FromTType(types.Typ[types.String]))))
-		NewWithT(t).Expect(rt.ConvertibleTo(FromRType(reflect.TypeOf("")))).To(Equal(tt.ConvertibleTo(FromTType(types.Typ[types.String]))))
+		testingx.Expect(t, rt.String(), testingx.Equal(tt.String()))
+		testingx.Expect(t, rt.Kind().String(), testingx.Equal(tt.Kind().String()))
+		testingx.Expect(t, rt.Name(), testingx.Equal(tt.Name()))
+		testingx.Expect(t, rt.PkgPath(), testingx.Equal(tt.PkgPath()))
+		testingx.Expect(t, rt.Comparable(), testingx.Equal(tt.Comparable()))
+		testingx.Expect(t, rt.AssignableTo(FromRType(reflect.TypeOf(""))), testingx.Equal(tt.AssignableTo(FromTType(types.Typ[types.String]))))
+		testingx.Expect(t, rt.ConvertibleTo(FromRType(reflect.TypeOf(""))), testingx.Equal(tt.ConvertibleTo(FromTType(types.Typ[types.String]))))
 
-		NewWithT(t).Expect(rt.NumMethod()).To(Equal(tt.NumMethod()))
+		testingx.Expect(t, rt.NumMethod(), testingx.Equal(tt.NumMethod()))
 
 		for i := 0; i < rt.NumMethod(); i++ {
 			rMethod := rt.Method(i)
 			tMethod, ok := tt.MethodByName(rMethod.Name())
 
 			t.Run("M "+rMethod.Name()+" | "+rMethod.Type().String(), func(t *testing.T) {
-				NewWithT(t).Expect(ok).To(BeTrue())
-				NewWithT(t).Expect(rMethod.Name()).To(Equal(tMethod.Name()))
-				NewWithT(t).Expect(rMethod.PkgPath()).To(Equal(tMethod.PkgPath()))
-				NewWithT(t).Expect(rMethod.Type().String()).To(Equal(tMethod.Type().String()))
+				testingx.Expect(t, ok, testingx.BeTrue())
+				testingx.Expect(t, rMethod.Name(), testingx.Equal(tMethod.Name()))
+				testingx.Expect(t, rMethod.PkgPath(), testingx.Equal(tMethod.PkgPath()))
+				testingx.Expect(t, rMethod.Type().String(), testingx.Equal(tMethod.Type().String()))
 			})
 		}
 
 		{
 			_, rOk := rt.MethodByName("String")
 			_, tOk := tt.MethodByName("String")
-			NewWithT(t).Expect(rOk).To(Equal(tOk))
+			testingx.Expect(t, rOk, testingx.Equal(tOk))
 		}
 
 		{
 			rReplacer, rIs := EncodingTextMarshalerTypeReplacer(rt)
 			tReplacer, tIs := EncodingTextMarshalerTypeReplacer(tt)
-			NewWithT(t).Expect(rIs).To(Equal(tIs))
-			NewWithT(t).Expect(rReplacer.String()).To(Equal(tReplacer.String()))
+			testingx.Expect(t, rIs, testingx.Equal(tIs))
+			testingx.Expect(t, rReplacer.String(), testingx.Equal(tReplacer.String()))
 		}
 
 		if rt.Kind() == reflect.Array {
-			NewWithT(t).Expect(rt.Len()).To(Equal(tt.Len()))
+			testingx.Expect(t, rt.Len(), testingx.Equal(tt.Len()))
 		}
 
 		if rt.Kind() == reflect.Map {
-			NewWithT(t).Expect(FullTypeName(rt.Key())).To(Equal(FullTypeName(tt.Key())))
+			testingx.Expect(t, FullTypeName(rt.Key()), testingx.Equal(FullTypeName(tt.Key())))
 		}
 
 		if rt.Kind() == reflect.Array || rt.Kind() == reflect.Slice || rt.Kind() == reflect.Map {
-			NewWithT(t).Expect(FullTypeName(rt.Elem())).To(Equal(FullTypeName(tt.Elem())))
+			testingx.Expect(t, FullTypeName(rt.Elem()), testingx.Equal(FullTypeName(tt.Elem())))
 		}
 
 		if rt.Kind() == reflect.Struct {
-			NewWithT(t).Expect(rt.NumField()).To(Equal(tt.NumField()))
+			testingx.Expect(t, rt.NumField(), testingx.Equal(tt.NumField()))
 
 			for i := 0; i < rt.NumField(); i++ {
 				rsf := rt.Field(i)
 				tsf := tt.Field(i)
 
 				t.Run("F "+rsf.Name(), func(t *testing.T) {
-					NewWithT(t).Expect(rsf.Anonymous()).To(Equal(tsf.Anonymous()))
-					NewWithT(t).Expect(rsf.Tag()).To(Equal(tsf.Tag()))
-					NewWithT(t).Expect(rsf.Name()).To(Equal(tsf.Name()))
-					NewWithT(t).Expect(rsf.PkgPath()).To(Equal(tsf.PkgPath()))
-					NewWithT(t).Expect(FullTypeName(rsf.Type())).To(Equal(FullTypeName(tsf.Type())))
+					testingx.Expect(t, rsf.Anonymous(), testingx.Equal(tsf.Anonymous()))
+					testingx.Expect(t, rsf.Tag(), testingx.Equal(tsf.Tag()))
+					testingx.Expect(t, rsf.Name(), testingx.Equal(tsf.Name()))
+					testingx.Expect(t, rsf.PkgPath(), testingx.Equal(tsf.PkgPath()))
+					testingx.Expect(t, FullTypeName(rsf.Type()), testingx.Equal(FullTypeName(tsf.Type())))
 
 					if rsf.Type().Kind() == reflect.Struct {
 						elmT := rsf.Type()
@@ -186,11 +187,11 @@ func check(t *testing.T, v any) {
 							rsf := elmT.Field(i)
 							tsf := elmT.Field(i)
 
-							NewWithT(t).Expect(rsf.Anonymous()).To(Equal(tsf.Anonymous()))
-							NewWithT(t).Expect(rsf.Tag()).To(Equal(tsf.Tag()))
-							NewWithT(t).Expect(rsf.Name()).To(Equal(tsf.Name()))
-							NewWithT(t).Expect(rsf.PkgPath()).To(Equal(tsf.PkgPath()))
-							NewWithT(t).Expect(FullTypeName(rsf.Type())).To(Equal(FullTypeName(tsf.Type())))
+							testingx.Expect(t, rsf.Anonymous(), testingx.Equal(tsf.Anonymous()))
+							testingx.Expect(t, rsf.Tag(), testingx.Equal(tsf.Tag()))
+							testingx.Expect(t, rsf.Name(), testingx.Equal(tsf.Name()))
+							testingx.Expect(t, rsf.PkgPath(), testingx.Equal(tsf.PkgPath()))
+							testingx.Expect(t, FullTypeName(rsf.Type()), testingx.Equal(FullTypeName(tsf.Type())))
 						}
 					}
 				})
@@ -201,19 +202,19 @@ func check(t *testing.T, v any) {
 					rsf, _ := rt.FieldByName("A")
 					tsf, _ := tt.FieldByName("A")
 
-					NewWithT(t).Expect(rsf.Anonymous()).To(Equal(tsf.Anonymous()))
-					NewWithT(t).Expect(rsf.Tag()).To(Equal(tsf.Tag()))
-					NewWithT(t).Expect(rsf.Name()).To(Equal(tsf.Name()))
-					NewWithT(t).Expect(rsf.PkgPath()).To(Equal(tsf.PkgPath()))
-					NewWithT(t).Expect(FullTypeName(rsf.Type())).To(Equal(FullTypeName(tsf.Type())))
+					testingx.Expect(t, rsf.Anonymous(), testingx.Equal(tsf.Anonymous()))
+					testingx.Expect(t, rsf.Tag(), testingx.Equal(tsf.Tag()))
+					testingx.Expect(t, rsf.Name(), testingx.Equal(tsf.Name()))
+					testingx.Expect(t, rsf.PkgPath(), testingx.Equal(tsf.PkgPath()))
+					testingx.Expect(t, FullTypeName(rsf.Type()), testingx.Equal(FullTypeName(tsf.Type())))
 
 					{
 						_, ok := rt.FieldByName("_")
-						NewWithT(t).Expect(ok).To(BeFalse())
+						testingx.Expect(t, ok, testingx.BeFalse())
 					}
 					{
 						_, ok := tt.FieldByName("_")
-						NewWithT(t).Expect(ok).To(BeFalse())
+						testingx.Expect(t, ok, testingx.BeFalse())
 					}
 				}
 
@@ -225,42 +226,42 @@ func check(t *testing.T, v any) {
 						return s == "A"
 					})
 
-					NewWithT(t).Expect(rsf.Anonymous()).To(Equal(tsf.Anonymous()))
-					NewWithT(t).Expect(rsf.Tag()).To(Equal(tsf.Tag()))
-					NewWithT(t).Expect(rsf.Name()).To(Equal(tsf.Name()))
-					NewWithT(t).Expect(rsf.PkgPath()).To(Equal(tsf.PkgPath()))
-					NewWithT(t).Expect(FullTypeName(rsf.Type())).To(Equal(FullTypeName(tsf.Type())))
+					testingx.Expect(t, rsf.Anonymous(), testingx.Equal(tsf.Anonymous()))
+					testingx.Expect(t, rsf.Tag(), testingx.Equal(tsf.Tag()))
+					testingx.Expect(t, rsf.Name(), testingx.Equal(tsf.Name()))
+					testingx.Expect(t, rsf.PkgPath(), testingx.Equal(tsf.PkgPath()))
+					testingx.Expect(t, FullTypeName(rsf.Type()), testingx.Equal(FullTypeName(tsf.Type())))
 
 					{
 						_, ok := rt.FieldByNameFunc(func(s string) bool {
 							return false
 						})
-						NewWithT(t).Expect(ok).To(BeFalse())
+						testingx.Expect(t, ok, testingx.BeFalse())
 					}
 					{
 						_, ok := tt.FieldByNameFunc(func(s string) bool {
 							return false
 						})
-						NewWithT(t).Expect(ok).To(BeFalse())
+						testingx.Expect(t, ok, testingx.BeFalse())
 					}
 				}
 			}
 		}
 
 		if rt.Kind() == reflect.Func {
-			NewWithT(t).Expect(rt.NumIn()).To(Equal(tt.NumIn()))
-			NewWithT(t).Expect(rt.NumOut()).To(Equal(tt.NumOut()))
+			testingx.Expect(t, rt.NumIn(), testingx.Equal(tt.NumIn()))
+			testingx.Expect(t, rt.NumOut(), testingx.Equal(tt.NumOut()))
 
 			for i := 0; i < rt.NumIn(); i++ {
 				rParam := rt.In(i)
 				tParam := tt.In(i)
-				NewWithT(t).Expect(rParam.String()).To(Equal(tParam.String()))
+				testingx.Expect(t, rParam.String(), testingx.Equal(tParam.String()))
 			}
 
 			for i := 0; i < rt.NumOut(); i++ {
 				rResult := rt.Out(i)
 				tResult := tt.Out(i)
-				NewWithT(t).Expect(rResult.String()).To(Equal(tResult.String()))
+				testingx.Expect(t, rResult.String(), testingx.Equal(tResult.String()))
 			}
 		}
 
@@ -268,7 +269,7 @@ func check(t *testing.T, v any) {
 			rt = Deref(rt).(*RType)
 			tt = Deref(tt).(*TType)
 
-			NewWithT(t).Expect(rt.String()).To(Equal(tt.String()))
+			testingx.Expect(t, rt.String(), testingx.Equal(tt.String()))
 		}
 	})
 }
@@ -276,11 +277,11 @@ func check(t *testing.T, v any) {
 func TestTryNew(t *testing.T) {
 	{
 		_, ok := TryNew(FromRType(reflect.TypeOf(typ.Struct{})))
-		NewWithT(t).Expect(ok).To(BeTrue())
+		testingx.Expect(t, ok, testingx.BeTrue())
 	}
 	{
 		_, ok := TryNew(FromTType(NewTypesTypeFromReflectType(reflect.TypeOf(typ.Struct{}))))
-		NewWithT(t).Expect(ok).To(BeFalse())
+		testingx.Expect(t, ok, testingx.BeFalse())
 	}
 }
 
@@ -296,7 +297,7 @@ func TestEachField(t *testing.T) {
 			names = append(names, fieldDisplayName)
 			return true
 		})
-		NewWithT(t).Expect(expect).To(Equal(names))
+		testingx.Expect(t, expect, testingx.Equal(names))
 	}
 
 	{
@@ -306,6 +307,6 @@ func TestEachField(t *testing.T) {
 			names = append(names, fieldDisplayName)
 			return true
 		})
-		NewWithT(t).Expect(expect).To(Equal(names))
+		testingx.Expect(t, expect, testingx.Equal(names))
 	}
 }

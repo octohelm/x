@@ -1,4 +1,4 @@
-package reflect
+package reflect_test
 
 import (
 	"reflect"
@@ -6,7 +6,8 @@ import (
 	"time"
 
 	"github.com/octohelm/x/ptr"
-	. "github.com/onsi/gomega"
+	reflectx "github.com/octohelm/x/reflect"
+	testingx "github.com/octohelm/x/testing"
 )
 
 type Bytes []byte
@@ -18,48 +19,48 @@ type NotBytes []Uint8
 func BenchmarkIsBytes(b *testing.B) {
 	b.Run("Raw Bytes", func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
-			IsBytes([]byte(""))
+			reflectx.IsBytes([]byte(""))
 		}
 	})
 	b.Run("Named Bytes", func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
-			IsBytes(Bytes(""))
+			reflectx.IsBytes(Bytes(""))
 		}
 	})
 }
 
 func TestIsBytes(t *testing.T) {
 	t.Run("Raw Bytes", func(t *testing.T) {
-		NewWithT(t).Expect(IsBytes([]byte(""))).To(BeTrue())
+		testingx.Expect(t, reflectx.IsBytes([]byte("")), testingx.BeTrue())
 	})
 	t.Run("Not Bytes", func(t *testing.T) {
-		NewWithT(t).Expect(IsBytes(NotBytes(""))).To(BeFalse())
+		testingx.Expect(t, reflectx.IsBytes(NotBytes("")), testingx.BeFalse())
 	})
 	t.Run("Named Bytes", func(t *testing.T) {
-		NewWithT(t).Expect(IsBytes(Bytes(""))).To(BeTrue())
+		testingx.Expect(t, reflectx.IsBytes(Bytes("")), testingx.BeTrue())
 	})
 	t.Run("Others", func(t *testing.T) {
-		NewWithT(t).Expect(IsBytes("")).To(BeFalse())
-		NewWithT(t).Expect(IsBytes(true)).To(BeFalse())
+		testingx.Expect(t, reflectx.IsBytes(""), testingx.BeFalse())
+		testingx.Expect(t, reflectx.IsBytes(true), testingx.BeFalse())
 	})
 }
 
 func TestFullTypeName(t *testing.T) {
-	NewWithT(t).Expect(FullTypeName(reflect.TypeOf(ptr.Ptr(1)))).To(Equal("*int"))
-	NewWithT(t).Expect(FullTypeName(reflect.PtrTo(reflect.TypeOf(1)))).To(Equal("*int"))
-	NewWithT(t).Expect(FullTypeName(reflect.PtrTo(reflect.TypeOf(time.Now())))).To(Equal("*time.Time"))
-	NewWithT(t).Expect(FullTypeName(reflect.PtrTo(reflect.TypeOf(struct {
+	testingx.Expect(t, reflectx.FullTypeName(reflect.TypeOf(ptr.Ptr(1))), testingx.Equal("*int"))
+	testingx.Expect(t, reflectx.FullTypeName(reflect.PtrTo(reflect.TypeOf(1))), testingx.Equal("*int"))
+	testingx.Expect(t, reflectx.FullTypeName(reflect.PtrTo(reflect.TypeOf(time.Now()))), testingx.Equal("*time.Time"))
+	testingx.Expect(t, reflectx.FullTypeName(reflect.PtrTo(reflect.TypeOf(struct {
 		Name string
-	}{})))).To(Equal("*struct { Name string }"))
+	}{}))), testingx.Equal("*struct { Name string }"))
 }
 
 func TestIndirectType(t *testing.T) {
-	NewWithT(t).Expect(reflect.TypeOf(1)).To(Equal(Deref(reflect.TypeOf(ptr.Ptr(1)))))
-	NewWithT(t).Expect(reflect.TypeOf(1)).To(Equal(Deref(reflect.PtrTo(reflect.TypeOf(1)))))
+	testingx.Expect(t, reflect.TypeOf(1), testingx.Equal(reflectx.Deref(reflect.TypeOf(ptr.Ptr(1)))))
+	testingx.Expect(t, reflect.TypeOf(1), testingx.Equal(reflectx.Deref(reflect.PtrTo(reflect.TypeOf(1)))))
 
 	tpe := reflect.TypeOf(1)
 	for i := 0; i < 10; i++ {
 		tpe = reflect.PtrTo(tpe)
 	}
-	NewWithT(t).Expect(reflect.TypeOf(1)).To(Equal(Deref(tpe)))
+	testingx.Expect(t, reflect.TypeOf(1), testingx.Equal(reflectx.Deref(tpe)))
 }

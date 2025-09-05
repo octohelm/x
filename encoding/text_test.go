@@ -11,7 +11,7 @@ import (
 
 	"github.com/octohelm/x/ptr"
 	"github.com/octohelm/x/slices"
-	. "github.com/onsi/gomega"
+	"github.com/octohelm/x/testing/bdd"
 )
 
 type Duration time.Duration
@@ -238,25 +238,36 @@ func BenchmarkUnmarshalTextAndMarshalText(b *testing.B) {
 }
 
 func TestUnmarshalTextAndMarshalText(t *testing.T) {
-	for _, c := range cases {
-		t.Run(fmt.Sprintf("UnmarshalText %s", c.name), func(t *testing.T) {
-			err := UnmarshalText(c.v, []byte(c.text))
+	b := bdd.FromT(t)
 
-			NewWithT(t).Expect(err).To(BeNil())
+	for _, c := range cases {
+		b.When(fmt.Sprintf("UnmarshalText %s", c.name), func(b bdd.T) {
+			err := UnmarshalText(c.v, []byte(c.text))
+			b.Then("success",
+				bdd.NoError(err),
+			)
 
 			if rv, ok := c.v.(reflect.Value); ok {
-				NewWithT(t).Expect(c.expect).To(Equal(rv.Interface()))
+				b.Then("value as expected",
+					bdd.Equal(c.expect, rv.Interface()),
+				)
 			} else {
-				NewWithT(t).Expect(c.expect).To(Equal(c.v))
+				b.Then("value as expected",
+					bdd.Equal(c.expect, c.v),
+				)
 			}
 		})
 	}
 
 	for _, c := range cases {
-		t.Run(fmt.Sprintf("MarshalText %s", c.name), func(t *testing.T) {
+		b.When(fmt.Sprintf("MarshalText %s", c.name), func(b bdd.T) {
 			text, err := MarshalText(c.v)
-			NewWithT(t).Expect(err).To(BeNil())
-			NewWithT(t).Expect(c.text).To(Equal(string(text)))
+			b.Then("success",
+				bdd.NoError(err),
+			)
+			b.Then("text as expected",
+				bdd.Equal(c.text, string(text)),
+			)
 		})
 	}
 
@@ -264,16 +275,19 @@ func TestUnmarshalTextAndMarshalText(t *testing.T) {
 		PtrString *string
 		Slice     []string
 	}{}
-
 	rv2 := reflect.ValueOf(v2)
 
-	{
-		_, err := MarshalText(rv2.FieldByName("Slice"))
-		NewWithT(t).Expect(err).NotTo(BeNil())
-	}
-
-	{
+	b.Given("PtrString", func(b bdd.T) {
 		_, err := MarshalText(rv2.FieldByName("PtrString"))
-		NewWithT(t).Expect(err).To(BeNil())
-	}
+		b.Then("success",
+			bdd.NoError(err),
+		)
+	})
+
+	b.Given("Slice", func(b bdd.T) {
+		_, err := MarshalText(rv2.FieldByName("Slice"))
+		b.Then("success",
+			bdd.HasError(err),
+		)
+	})
 }

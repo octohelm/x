@@ -1,22 +1,23 @@
 package internal
 
-import "fmt"
-
 type Matcher[A any] interface {
-	Name() string
-	Negative() bool
+	Action() string
 	Match(actual A) bool
-	FormatActual(actual A) string
+	Negative() bool
 }
 
-type ExpectedFormatter interface {
-	FormatExpected() string
+type MatcherWithActualNormalizer[T any] interface {
+	NormalizeActual(a T) any
 }
 
-func NewMatcher[A any](name string, match func(a A) bool) Matcher[A] {
+type MatcherWithNormalizedExpected interface {
+	NormalizedExpected() any
+}
+
+func NewMatcher[A any](action string, match func(a A) bool) Matcher[A] {
 	return &matcher[A]{
-		name:  name,
-		match: match,
+		action: action,
+		match:  match,
 	}
 }
 
@@ -35,8 +36,8 @@ func (m *negativeMatcher[A]) Negative() bool {
 }
 
 type matcher[A any] struct {
-	name  string
-	match func(a A) bool
+	action string
+	match  func(a A) bool
 }
 
 func (m *matcher[A]) Match(actual A) bool {
@@ -47,10 +48,6 @@ func (m *matcher[A]) Negative() bool {
 	return false
 }
 
-func (m *matcher[A]) Name() string {
-	return m.name
-}
-
-func (m *matcher[A]) FormatActual(actual A) string {
-	return fmt.Sprintf("%v", actual)
+func (m *matcher[A]) Action() string {
+	return m.action
 }

@@ -63,7 +63,7 @@ func methodsOf(typ types.Type) (methods []*TMethod) {
 			}
 		}
 	}
-	return
+	return methods
 }
 
 func (ttype *TType) tryScanMethods() {

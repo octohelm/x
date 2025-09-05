@@ -6,7 +6,7 @@ import (
 
 type Matcher[A any] = internal.Matcher[A]
 
-type ExpectedFormatter = internal.ExpectedFormatter
+type MatcherWithNormalizedExpected = internal.MatcherWithNormalizedExpected
 
 func NewMatcher[A any](name string, match func(a A) bool) Matcher[A] {
 	return internal.NewMatcher(name, match)

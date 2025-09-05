@@ -1,4 +1,4 @@
-package reflect
+package reflect_test
 
 import (
 	"fmt"
@@ -6,15 +6,17 @@ import (
 	"testing"
 
 	"github.com/octohelm/x/ptr"
-	. "github.com/onsi/gomega"
+	testingx "github.com/octohelm/x/testing"
+
+	. "github.com/octohelm/x/reflect"
 )
 
 func TestIndirect(t *testing.T) {
-	NewWithT(t).Expect(reflect.ValueOf(1).Interface()).To(Equal(Indirect(reflect.ValueOf(ptr.Ptr(1))).Interface()))
-	NewWithT(t).Expect(reflect.ValueOf(0).Interface()).To(Equal(Indirect(reflect.New(reflect.TypeOf(0))).Interface()))
+	testingx.Expect(t, reflect.ValueOf(1).Interface(), testingx.Equal(Indirect(reflect.ValueOf(ptr.Ptr(1))).Interface()))
+	testingx.Expect(t, reflect.ValueOf(0).Interface(), testingx.Equal(Indirect(reflect.New(reflect.TypeOf(0))).Interface()))
 
 	rv := New(reflect.PointerTo(reflect.PointerTo(reflect.PointerTo(reflect.TypeOf("")))))
-	NewWithT(t).Expect(reflect.ValueOf("").Interface()).To(Equal(Indirect(rv).Interface()))
+	testingx.Expect(t, reflect.ValueOf("").Interface(), testingx.Equal(Indirect(rv).Interface()))
 }
 
 type Zero string
@@ -43,22 +45,22 @@ func TestNew(t *testing.T) {
 	t.Run("NewType", func(t *testing.T) {
 		tpe := reflect.TypeOf(Zero(""))
 		z, ok := New(tpe).Interface().(Zero)
-		NewWithT(t).Expect(ok).To(BeTrue())
-		NewWithT(t).Expect(z).To(Equal(Zero("")))
+		testingx.Expect(t, ok, testingx.BeTrue())
+		testingx.Expect(t, z, testingx.Equal(Zero("")))
 	})
 
 	t.Run("NewPtrType", func(t *testing.T) {
 		tpe := reflect.PointerTo(reflect.TypeOf(Zero("")))
 		z, ok := New(tpe).Interface().(*Zero)
-		NewWithT(t).Expect(ok).To(BeTrue())
-		NewWithT(t).Expect(*z).To(Equal(Zero("")))
+		testingx.Expect(t, ok, testingx.BeTrue())
+		testingx.Expect(t, *z, testingx.Equal(Zero("")))
 	})
 
 	t.Run("NewPtrPtrType", func(t *testing.T) {
 		tpe := reflect.PointerTo(reflect.PointerTo(reflect.TypeOf(Zero(""))))
 		z, ok := New(tpe).Interface().(**Zero)
-		NewWithT(t).Expect(ok).To(BeTrue())
-		NewWithT(t).Expect(**z).To(Equal(Zero("")))
+		testingx.Expect(t, ok, testingx.BeTrue())
+		testingx.Expect(t, **z, testingx.Equal(Zero("")))
 	})
 }
 
@@ -103,14 +105,14 @@ func BenchmarkIsEmptyValue(b *testing.B) {
 func TestIsEmptyValue(t *testing.T) {
 	for i, v := range emptyValues {
 		t.Run(fmt.Sprintf("%d: %#v", i, v), func(t *testing.T) {
-			NewWithT(t).Expect(IsEmptyValue(v)).To(BeTrue())
+			testingx.Expect(t, IsEmptyValue(v), testingx.BeTrue())
 		})
 
 		if _, ok := v.(reflect.Value); !ok {
 			rv := reflect.ValueOf(v)
 
 			t.Run(fmt.Sprintf("%d: reflect.Value(%#v)", i, v), func(t *testing.T) {
-				NewWithT(t).Expect(IsEmptyValue(rv)).To(BeTrue())
+				testingx.Expect(t, IsEmptyValue(rv), testingx.BeTrue())
 			})
 		}
 	}

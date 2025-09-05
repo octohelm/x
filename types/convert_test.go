@@ -1,4 +1,4 @@
-package types
+package types_test
 
 import (
 	"reflect"
@@ -6,7 +6,7 @@ import (
 
 	testingx "github.com/octohelm/x/testing"
 
-	. "github.com/onsi/gomega"
+	. "github.com/octohelm/x/types"
 )
 
 func TestTypeFor(t *testing.T) {
@@ -24,7 +24,7 @@ func TestTypeFor(t *testing.T) {
 
 	for i := range cases {
 		c := cases[i]
-		NewWithT(t).Expect(FromTType(TypeFor(c)).String()).To(Equal(c))
+		testingx.Expect(t, FromTType(TypeFor(c)).String(), testingx.Equal(c))
 	}
 }
 

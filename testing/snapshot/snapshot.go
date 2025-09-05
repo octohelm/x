@@ -6,6 +6,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"slices"
 	"strings"
 
 	"github.com/octohelm/x/testing/internal"
@@ -67,7 +68,7 @@ func Match(name string, options ...Option) internal.Matcher[*Snapshot] {
 	m := &snapshotMatcher{
 		filename: snapshotFilename,
 		expected: snapshot,
-		update:   updateSnapshots == "ALL" || strings.Contains(updateSnapshots, name),
+		update:   strings.ToUpper(updateSnapshots) == "ALL" || strings.Contains(updateSnapshots, name),
 	}
 
 	for _, fn := range options {
@@ -84,23 +85,15 @@ type snapshotMatcher struct {
 	update   bool
 }
 
-func (s *snapshotMatcher) Name() string {
-	return "MatchSnapshot"
+func (snapshotMatcher) Action() string {
+	return "match snapshot"
 }
 
 func (s *snapshotMatcher) Negative() bool {
 	return false
 }
 
-var _ internal.ExpectedFormatter = &snapshotMatcher{}
-
-func (s *snapshotMatcher) FormatExpected() string {
-	return string(s.expected)
-}
-
-func (s *snapshotMatcher) FormatActual(a *Snapshot) string {
-	return string(txtar.Format((*txtar.Archive)(a)))
-}
+var _ internal.MatcherWithNormalizedExpected = &snapshotMatcher{}
 
 func (s *snapshotMatcher) Match(a *Snapshot) bool {
 	data := txtar.Format((*txtar.Archive)(a))
@@ -123,3 +116,29 @@ func (s *snapshotMatcher) commitSnapshots(data []byte) error {
 	}
 	return os.WriteFile(filename, data, 0o644)
 }
+
+func (s *snapshotMatcher) NormalizedExpected() any {
+	return LinesFromBytes(s.expected)
+}
+
+func (s *snapshotMatcher) NormalizeActual(a *Snapshot) any {
+	return LinesFromBytes(txtar.Format((*txtar.Archive)(a)))
+}
+
+func LinesFromBytes(data []byte) Lines {
+	return slices.Collect(func(yield func(line string) bool) {
+		for line := range strings.Lines(string(data)) {
+			if len(line) > 0 {
+				if line[len(line)-1] == '\n' {
+					line = line[:len(line)-1]
+				}
+			}
+
+			if !yield(line) {
+				return
+			}
+		}
+	})
+}
+
+type Lines []string
