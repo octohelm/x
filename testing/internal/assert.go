@@ -40,8 +40,7 @@ func failureMessage[A any](actual A, m Matcher[A]) string {
 
 func maybeDiff(actual any, m any) any {
 	if f, ok := m.(MatcherWithNormalizedExpected); ok {
-
-		return cmp.Diff(actual, f.NormalizedExpected())
+		return cmp.Diff(f.NormalizedExpected(), actual)
 	}
 
 	return actual

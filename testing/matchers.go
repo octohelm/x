@@ -56,7 +56,7 @@ func NotEqual[T any](e T) Matcher[T] {
 
 func Equal[T any](e T) Matcher[T] {
 	return internal.NewCompareMatcher[T, T]("Equal", func(a T, e T) bool {
-		return reflect.DeepEqual(a, e)
+		return reflect.DeepEqual(e, a)
 	})(e)
 }
 
