@@ -10,6 +10,7 @@ type TB interface {
 	Setenv(key, value string)
 
 	Skip(args ...any)
+	Skipped() bool
 
 	Context() context.Context
 }
@@ -47,21 +48,37 @@ func (t *bddT) Unwrap() *testing.T {
 }
 
 func (t *bddT) Given(summary string, setup func(b T)) {
+	if t.Skipped() {
+		return
+	}
+
 	t.T.Run("GIVEN  "+summary, func(t *testing.T) {
 		setup(FromT(t))
 	})
 }
 
 func (t *bddT) When(summary string, setup func(b T)) {
+	if t.Skipped() {
+		return
+	}
+
 	t.T.Run("WHEN  "+summary, func(t *testing.T) {
 		setup(FromT(t))
 	})
 }
 
 func (t *bddT) Then(summary string, checkers ...Checker) {
+	if t.Skipped() {
+		return
+	}
+
 	t.T.Helper()
 
 	t.T.Run("THEN  "+summary, func(t *testing.T) {
+		if t.Skipped() {
+			return
+		}
+
 		t.Helper()
 
 		tt := FromT(t)
