@@ -10,10 +10,11 @@ import (
 func TestDiff(t *testing.T) {
 	t.Run("normal diff", func(t *testing.T) {
 		base := MustFromValue(Obj{
-			"int_changed":      1,
-			"str_not_changed":  "string",
-			"list_not_changed": List{"1", "2"},
-			"list_changed":     List{"2"},
+			"int_changed":                1,
+			"str_not_changed":            "string",
+			"list_not_changed":           List{"1", "2"},
+			"list_changed":               List{"2"},
+			"bool_not_exists_as_changed": true,
 		}).(*Object)
 
 		target := MustFromValue(Obj{
@@ -27,8 +28,9 @@ func TestDiff(t *testing.T) {
 		testingx.Expect(t, err, testingx.Be[error](nil))
 
 		testingx.Expect(t, diffed.Value(), testingx.Equal[any](Obj{
-			"int_changed":  2,
-			"list_changed": List{"1"},
+			"int_changed":                2,
+			"list_changed":               List{"1"},
+			"bool_not_exists_as_changed": false,
 		}))
 	})
 

@@ -66,7 +66,8 @@ func (d *differ) diffObject(left *Object, right *Object) Valuer {
 	merged := &Object{}
 
 	for key, valuer := range left.KeyValues() {
-		if rightValue, ok := right.Get(key); ok {
+		rightValue, rightExists := right.Get(key)
+		if rightExists {
 			switch x := rightValue.(type) {
 			case *Array:
 				if leftValue, ok := valuer.(*Array); ok {
@@ -93,6 +94,15 @@ func (d *differ) diffObject(left *Object, right *Object) Valuer {
 		}
 
 		if _, ok := valuer.(*Null); !ok {
+			if !rightExists {
+				// when right value is not exists , and left prop is bool
+				// right as false
+				if _, ok := valuer.(*Boolean); ok {
+					merged.Set(key, BooleanOf(false))
+					continue
+				}
+			}
+
 			merged.Set(key, valuer)
 		}
 	}

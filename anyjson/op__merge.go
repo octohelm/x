@@ -55,7 +55,8 @@ func (m *merger) mergeObject(left *Object, right *Object) Valuer {
 	merged := &Object{}
 
 	for key, valuer := range left.KeyValues() {
-		if rightValue, ok := right.Get(key); ok {
+		rightValue, rightExists := right.Get(key)
+		if rightExists {
 			switch x := rightValue.(type) {
 			case *Array:
 				if leftValue, ok := valuer.(*Array); ok {
@@ -71,7 +72,7 @@ func (m *merger) mergeObject(left *Object, right *Object) Valuer {
 				}
 			case *Null:
 				if m.nullOp == NullAsRemover {
-					// don't merger null valuer
+					// don't merge null valuer
 					valuer = &Null{}
 					continue
 				}
@@ -81,8 +82,18 @@ func (m *merger) mergeObject(left *Object, right *Object) Valuer {
 		}
 
 		if _, ok := valuer.(*Null); !ok {
+			if !rightExists {
+				// when right value is not exists , and left prop is bool
+				// drop left value
+				if _, ok := valuer.(*Boolean); ok {
+					merged.Delete(key)
+					continue
+				}
+			}
+
 			merged.Set(key, valuer)
 		}
+
 	}
 
 	for key, value := range right.KeyValues() {

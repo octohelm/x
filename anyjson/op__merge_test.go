@@ -15,6 +15,7 @@ func TestMerge(t *testing.T) {
 			"arr": List{
 				"1", "2",
 			},
+			"boolRemoveWhenNotExists": true,
 		}).(*Object)
 
 		patch := MustFromValue(Obj{
