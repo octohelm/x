@@ -32,10 +32,10 @@ func failureMessage[A any](actual A, m Matcher[A]) string {
 	}
 
 	if m.Negative() {
-		return fmt.Sprintf("should not %s, but got\n%s", m.Action(), maybeDiff(v, m))
+		return fmt.Sprintf("should not %s, but got\n%v", m.Action(), maybeDiff(v, m))
 	}
 
-	return fmt.Sprintf("should %s, but got\n%s", m.Action(), maybeDiff(v, m))
+	return fmt.Sprintf("should %s, but got\n%v", m.Action(), maybeDiff(v, m))
 }
 
 func maybeDiff(actual any, m any) any {
