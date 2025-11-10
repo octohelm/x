@@ -7,7 +7,7 @@ tool mvdan.cc/gofumpt
 require (
 	github.com/go-json-experiment/json v0.0.0-20251027170946-4849db3c2f7e
 	github.com/google/go-cmp v0.7.0
-	golang.org/x/sync v0.17.0
+	golang.org/x/sync v0.18.0
 	golang.org/x/text v0.30.0
 	golang.org/x/tools v0.38.0
 )
