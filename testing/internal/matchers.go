@@ -6,8 +6,15 @@ import (
 	reflectx "github.com/octohelm/x/reflect"
 )
 
+type Equatable[T any] interface {
+	Equal(T) bool
+}
+
 func Equal[T any](e T) Matcher[T] {
 	return NewCompareMatcher[T, T]("equal", func(a T, e T) bool {
+		if x, ok := any(e).(Equatable[T]); ok {
+			return x.Equal(a)
+		}
 		return reflect.DeepEqual(a, e)
 	})(e)
 }

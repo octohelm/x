@@ -2,11 +2,10 @@ package snapshot
 
 import (
 	"bytes"
-	"fmt"
+	"errors"
 	"os"
 	"path"
 	"path/filepath"
-	"slices"
 	"strings"
 
 	"github.com/octohelm/x/testing/internal"
@@ -21,124 +20,99 @@ func init() {
 	updateSnapshots = os.Getenv("UPDATE_SNAPSHOTS")
 }
 
-type Option = func(m *snapshotMatcher)
-
-func WithSnapshotUpdate() Option {
-	return func(m *snapshotMatcher) {
-		m.update = true
-	}
-}
-
-func WithWorkDir(wd string) Option {
-	return func(m *snapshotMatcher) {
-		m.wd = wd
-	}
-}
-
 func NewSnapshot() *Snapshot {
 	return &Snapshot{}
 }
 
-type Snapshot txtar.Archive
+func Load(name string) *Snapshot {
+	// testdata/__snapshots__/<name>.txtar
+
+	filename := path.Join(
+		"testdata",
+		"__snapshots__",
+		strings.ReplaceAll(cases.Lower(language.Und).String(name), " ", "_")+".txtar",
+	)
+
+	if strings.ToUpper(updateSnapshots) == "ALL" || strings.Contains(updateSnapshots, name) {
+		return &Snapshot{
+			filename: filename,
+		}
+	}
+
+	snapshot, err := os.ReadFile(filename)
+	if err != nil {
+		if errors.Is(err, os.ErrNotExist) {
+			return &Snapshot{
+				filename: filename,
+			}
+		}
+		panic(err)
+	}
+
+	t := txtar.Parse(snapshot)
+
+	return &Snapshot{
+		filename: filename,
+		files:    t.Files,
+	}
+}
+
+type File = txtar.File
+
+func FileFromRaw(filename string, data []byte) File {
+	return File{
+		Name: filename,
+		Data: data,
+	}
+}
+
+func Files(files ...File) *Snapshot {
+	return &Snapshot{files: files}
+}
+
+type Snapshot struct {
+	filename string
+	files    []txtar.File
+}
+
+func (s *Snapshot) Lines() internal.Lines {
+	return internal.LinesFromBytes(txtar.Format(&txtar.Archive{
+		Files: s.files,
+	}))
+}
+
+func (s *Snapshot) Bytes() []byte {
+	return txtar.Format(&txtar.Archive{
+		Files: s.files,
+	})
+}
 
 func (s *Snapshot) Add(file string, data []byte) {
-	s.Files = append(s.Files, txtar.File{
+	s.files = append(s.files, txtar.File{
 		Name: file,
 		Data: data,
 	})
 }
 
 func (s Snapshot) With(file string, data []byte) *Snapshot {
-	s.Files = append(s.Files, txtar.File{
+	s.files = append(s.files, txtar.File{
 		Name: file,
 		Data: data,
 	})
 	return &s
 }
 
-func Match(name string, options ...Option) internal.Matcher[*Snapshot] {
-	// testdata/__snapshots__/<name>.txtar
-
-	snapshotFilename := fmt.Sprintf("testdata/__snapshots__/%s.txtar",
-		strings.ReplaceAll(cases.Lower(language.Und).String(name), " ", "_"),
-	)
-
-	snapshot, _ := os.ReadFile(snapshotFilename)
-
-	m := &snapshotMatcher{
-		filename: snapshotFilename,
-		expected: snapshot,
-		update:   strings.ToUpper(updateSnapshots) == "ALL" || strings.Contains(updateSnapshots, name),
-	}
-
-	for _, fn := range options {
-		fn(m)
-	}
-
-	return m
-}
-
-type snapshotMatcher struct {
-	wd       string
-	filename string
-	expected []byte
-	update   bool
-}
-
-func (snapshotMatcher) Action() string {
-	return "match snapshot"
-}
-
-func (s *snapshotMatcher) Negative() bool {
-	return false
-}
-
-var _ internal.MatcherWithNormalizedExpected = &snapshotMatcher{}
-
-func (s *snapshotMatcher) Match(a *Snapshot) bool {
-	data := txtar.Format((*txtar.Archive)(a))
-	if s.update || len(s.expected) == 0 {
-		if err := s.commitSnapshots(data); err != nil {
-			panic(err)
-		}
+func (s *Snapshot) Equal(a *Snapshot) bool {
+	a.filename = s.filename
+	if len(s.files) == 0 {
 		return true
 	}
-	return bytes.Equal(data, s.expected)
+	return bytes.Equal(s.Bytes(), a.Bytes())
 }
 
-func (s *snapshotMatcher) commitSnapshots(data []byte) error {
-	filename := s.filename
-	if s.wd != "" {
-		filename = path.Join(s.wd, filename)
-	}
-	if err := os.MkdirAll(filepath.Dir(filename), os.ModePerm); err != nil {
+func (s *Snapshot) PostMatched() error {
+	if err := os.MkdirAll(filepath.Dir(s.filename), os.ModePerm); err != nil {
 		return err
 	}
-	return os.WriteFile(filename, data, 0o644)
+	return os.WriteFile(s.filename, s.Bytes(), 0o644)
 }
-
-func (s *snapshotMatcher) NormalizedExpected() any {
-	return LinesFromBytes(s.expected)
-}
-
-func (s *snapshotMatcher) NormalizeActual(a *Snapshot) any {
-	return LinesFromBytes(txtar.Format((*txtar.Archive)(a)))
-}
-
-func LinesFromBytes(data []byte) Lines {
-	return slices.Collect(func(yield func(line string) bool) {
-		for line := range strings.Lines(string(data)) {
-			if len(line) > 0 {
-				if line[len(line)-1] == '\n' {
-					line = line[:len(line)-1]
-				}
-			}
-
-			if !yield(line) {
-				return
-			}
-		}
-	})
-}
-
-type Lines []string

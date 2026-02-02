@@ -4,11 +4,12 @@ import (
 	"testing"
 
 	"github.com/octohelm/x/testing/bdd"
+	"github.com/octohelm/x/testing/snapshot"
 )
 
 func TestFeature(t *testing.T) {
-	t.Run("case 1", bdd.ScenarioT(func(t bdd.T) {
-		t.Given("initial value with 1", func(t bdd.T) {
+	t.Run("case 1", bdd.ScenarioT(func(b bdd.T) {
+		b.Given("initial value with 1", func(t bdd.T) {
 			value := 1
 
 			t.When("add 1", func(c bdd.T) {
@@ -31,5 +32,17 @@ func TestFeature(t *testing.T) {
 				)
 			})
 		})
+	}))
+
+	t.Run("snapshot", bdd.GivenT(func(b bdd.T) {
+		b.Then("match",
+			bdd.EqualDoValue(
+				bdd.Snapshot("test"),
+				func() (*snapshot.Snapshot, error) {
+					return snapshot.Files(
+						snapshot.FileFromRaw("x.txt", []byte("1231")),
+					), nil
+				}),
+		)
 	}))
 }

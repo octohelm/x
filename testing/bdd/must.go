@@ -2,6 +2,15 @@ package bdd
 
 import "encoding"
 
+func Must[T any](v T, err error) T {
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
+// MustDo
+// Deprecated use DoValue instead
 func MustDo[T any](action func() (T, error)) T {
 	x, err := action()
 	if err != nil {
@@ -10,19 +19,14 @@ func MustDo[T any](action func() (T, error)) T {
 	return x
 }
 
+// MustDo2
+// Deprecated use DoValues instead
 func MustDo2[A any, B any](action func() (A, B, error)) (A, B) {
 	a, b, err := action()
 	if err != nil {
 		panic(err)
 	}
 	return a, b
-}
-
-func Must[T any](v T, err error) T {
-	if err != nil {
-		panic(err)
-	}
-	return v
 }
 
 func Must2[A any, B any](a A, b B, err error) (A, B) {

@@ -6,13 +6,23 @@ import (
 )
 
 type TB interface {
+	TempDir() string
+
 	Chdir(dir string)
 	Setenv(key, value string)
 
 	Skip(args ...any)
 	Skipped() bool
 
+	Fatal(args ...any)
+
 	Context() context.Context
+
+	Cleanup(func())
+}
+
+type WithHelper interface {
+	Helper()
 }
 
 type T interface {

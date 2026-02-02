@@ -9,9 +9,7 @@ import (
 	"strings"
 )
 
-var (
-	ErrInvalidDataURI = errors.New("invalid data uri")
-)
+var ErrInvalidDataURI = errors.New("invalid data uri")
 
 func Parse(dataURI string) (*DataURI, error) {
 	withoutPrefix := ""

@@ -8,7 +8,6 @@ import (
 	"testing"
 
 	"github.com/octohelm/x/testing/internal"
-	"github.com/octohelm/x/testing/snapshot"
 )
 
 func SliceHaveLen[Slice ~[]E, E any](expect int, actual Slice) Checker {
@@ -37,7 +36,7 @@ func ErrorIs(expect error, err error) Checker {
 }
 
 func HasError(err error) Checker {
-	matcher := internal.NewMatcher[error]("hash error", func(e error) bool {
+	matcher := internal.NewMatcher[error]("has error", func(e error) bool {
 		return e != nil
 	})
 	return asChecker(matcher, err)
@@ -87,10 +86,6 @@ func NotEqual[V any](expect V, actual V) Checker {
 	return asChecker(matcher, actual)
 }
 
-func MatchSnapshot(build func(s *snapshot.Snapshot), snapshotName string) Checker {
-	return asChecker(snapshot.Match(snapshotName), Build(build))
-}
-
 func asChecker[T any](matcher internal.Matcher[T], actual T) Checker {
 	return &checker[T]{
 		Matcher: matcher,
@@ -109,6 +104,7 @@ func (c *checker[T]) Check(t TB) {
 	case interface{ Unwrap() *testing.T }:
 		tt := x.Unwrap()
 		tt.Helper()
+
 		internal.Expect(tt, c.actual, c.Matcher)
 	}
 }
