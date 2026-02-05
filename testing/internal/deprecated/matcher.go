@@ -1,4 +1,4 @@
-package internal
+package deprecated
 
 type Matcher[A any] interface {
 	Action() string

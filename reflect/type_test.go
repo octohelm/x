@@ -5,16 +5,17 @@ import (
 	"testing"
 	"time"
 
+	"github.com/octohelm/x/cmp"
 	"github.com/octohelm/x/ptr"
 	reflectx "github.com/octohelm/x/reflect"
-	testingx "github.com/octohelm/x/testing"
+	. "github.com/octohelm/x/testing/v2"
 )
 
-type Bytes []byte
-
-type Uint8 uint8
-
-type NotBytes []Uint8
+type (
+	Bytes    []byte
+	Uint8    uint8
+	NotBytes []Uint8
+)
 
 func BenchmarkIsBytes(b *testing.B) {
 	b.Run("Raw Bytes", func(b *testing.B) {
@@ -31,36 +32,71 @@ func BenchmarkIsBytes(b *testing.B) {
 
 func TestIsBytes(t *testing.T) {
 	t.Run("Raw Bytes", func(t *testing.T) {
-		testingx.Expect(t, reflectx.IsBytes([]byte("")), testingx.BeTrue())
+		Then(t, "[]byte should be identified as bytes",
+			Expect(reflectx.IsBytes([]byte("")), Be(cmp.True())),
+		)
 	})
 	t.Run("Not Bytes", func(t *testing.T) {
-		testingx.Expect(t, reflectx.IsBytes(NotBytes("")), testingx.BeFalse())
+		Then(t, "[]Uint8 (named uint8) should not be identified as bytes",
+			Expect(reflectx.IsBytes(NotBytes("")), Be(cmp.False())),
+		)
 	})
 	t.Run("Named Bytes", func(t *testing.T) {
-		testingx.Expect(t, reflectx.IsBytes(Bytes("")), testingx.BeTrue())
+		Then(t, "Named []byte should still be identified as bytes",
+			Expect(reflectx.IsBytes(Bytes("")), Be(cmp.True())),
+		)
 	})
 	t.Run("Others", func(t *testing.T) {
-		testingx.Expect(t, reflectx.IsBytes(""), testingx.BeFalse())
-		testingx.Expect(t, reflectx.IsBytes(true), testingx.BeFalse())
+		Then(t, "non-slice types should be false",
+			Expect(reflectx.IsBytes(""), Be(cmp.False())),
+			Expect(reflectx.IsBytes(true), Be(cmp.False())),
+		)
 	})
 }
 
 func TestFullTypeName(t *testing.T) {
-	testingx.Expect(t, reflectx.FullTypeName(reflect.TypeOf(ptr.Ptr(1))), testingx.Equal("*int"))
-	testingx.Expect(t, reflectx.FullTypeName(reflect.PtrTo(reflect.TypeOf(1))), testingx.Equal("*int"))
-	testingx.Expect(t, reflectx.FullTypeName(reflect.PtrTo(reflect.TypeOf(time.Now()))), testingx.Equal("*time.Time"))
-	testingx.Expect(t, reflectx.FullTypeName(reflect.PtrTo(reflect.TypeOf(struct {
-		Name string
-	}{}))), testingx.Equal("*struct { Name string }"))
+	t.Run("GIVEN various types", func(t *testing.T) {
+		Then(t, "should return correct full name string",
+			Expect(
+				reflectx.FullTypeName(reflect.TypeOf(ptr.Ptr(1))),
+				Equal("*int"),
+			),
+			Expect(
+				reflectx.FullTypeName(reflect.PointerTo(reflect.TypeOf(1))),
+				Equal("*int"),
+			),
+			Expect(
+				reflectx.FullTypeName(reflect.PointerTo(reflect.TypeOf(time.Now()))),
+				Equal("*time.Time"),
+			),
+			Expect(
+				reflectx.FullTypeName(reflect.PointerTo(reflect.TypeOf(struct {
+					Name string
+				}{}))),
+				Equal("*struct { Name string }"),
+			),
+		)
+	})
 }
 
 func TestIndirectType(t *testing.T) {
-	testingx.Expect(t, reflect.TypeOf(1), testingx.Equal(reflectx.Deref(reflect.TypeOf(ptr.Ptr(1)))))
-	testingx.Expect(t, reflect.TypeOf(1), testingx.Equal(reflectx.Deref(reflect.PtrTo(reflect.TypeOf(1)))))
+	t.Run("GIVEN a pointer type", func(t *testing.T) {
+		expected := reflect.TypeOf(1)
 
-	tpe := reflect.TypeOf(1)
-	for i := 0; i < 10; i++ {
-		tpe = reflect.PtrTo(tpe)
-	}
-	testingx.Expect(t, reflect.TypeOf(1), testingx.Equal(reflectx.Deref(tpe)))
+		Then(t, "Deref should return the underlying element type",
+			Expect(reflectx.Deref(reflect.TypeOf(ptr.Ptr(1))), Equal(expected)),
+			Expect(reflectx.Deref(reflect.PointerTo(reflect.TypeOf(1))), Equal(expected)),
+		)
+	})
+
+	t.Run("WHEN having deep nested pointers", func(t *testing.T) {
+		tpe := reflect.TypeOf(1)
+		for i := 0; i < 10; i++ {
+			tpe = reflect.PointerTo(tpe)
+		}
+
+		Then(t, "Deref should recursively unwrap all levels",
+			Expect(reflectx.Deref(tpe), Equal(reflect.TypeOf(1))),
+		)
+	})
 }

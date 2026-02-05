@@ -2,16 +2,13 @@ package snapshot
 
 import (
 	"bytes"
-	"errors"
+	"fmt"
+	"iter"
 	"os"
-	"path"
 	"path/filepath"
-	"strings"
+	"slices"
 
-	"github.com/octohelm/x/testing/internal"
-	"golang.org/x/text/cases"
-	"golang.org/x/text/language"
-	"golang.org/x/tools/txtar"
+	"github.com/octohelm/x/testing/lines"
 )
 
 var updateSnapshots string
@@ -24,86 +21,70 @@ func NewSnapshot() *Snapshot {
 	return &Snapshot{}
 }
 
-func Load(name string) *Snapshot {
-	// testdata/__snapshots__/<name>.txtar
-
-	filename := path.Join(
-		"testdata",
-		"__snapshots__",
-		strings.ReplaceAll(cases.Lower(language.Und).String(name), " ", "_")+".txtar",
-	)
-
-	if strings.ToUpper(updateSnapshots) == "ALL" || strings.Contains(updateSnapshots, name) {
-		return &Snapshot{
-			filename: filename,
-		}
-	}
-
-	snapshot, err := os.ReadFile(filename)
-	if err != nil {
-		if errors.Is(err, os.ErrNotExist) {
-			return &Snapshot{
-				filename: filename,
-			}
-		}
-		panic(err)
-	}
-
-	t := txtar.Parse(snapshot)
-
-	return &Snapshot{
-		filename: filename,
-		files:    t.Files,
-	}
-}
-
-type File = txtar.File
-
-func FileFromRaw(filename string, data []byte) File {
-	return File{
-		Name: filename,
-		Data: data,
-	}
-}
-
-func Files(files ...File) *Snapshot {
+func FromFiles(files ...*File) *Snapshot {
 	return &Snapshot{files: files}
 }
 
 type Snapshot struct {
-	filename string
-	files    []txtar.File
+	ctx   *Context
+	files []*File
 }
 
-func (s *Snapshot) Lines() internal.Lines {
-	return internal.LinesFromBytes(txtar.Format(&txtar.Archive{
-		Files: s.files,
-	}))
+func (s *Snapshot) IsZero() bool {
+	return s == nil || len(s.files) == 0
 }
 
 func (s *Snapshot) Bytes() []byte {
-	return txtar.Format(&txtar.Archive{
-		Files: s.files,
-	})
+	var buf bytes.Buffer
+	for _, f := range s.files {
+		_, _ = fmt.Fprintf(&buf, "-- %s --\n", f.Name)
+		buf.Write(fixNL(f.Data))
+	}
+	return buf.Bytes()
+}
+
+func fixNL(data []byte) []byte {
+	if len(data) == 0 || data[len(data)-1] == '\n' {
+		return data
+	}
+	d := make([]byte, len(data)+1)
+	copy(d, data)
+	d[len(data)] = '\n'
+	return d
+}
+
+func (s *Snapshot) Files() iter.Seq[*File] {
+	return slices.Values(s.files)
+}
+
+func (s *Snapshot) Lines() lines.Lines {
+	return lines.FromBytes(s.Bytes())
 }
 
 func (s *Snapshot) Add(file string, data []byte) {
-	s.files = append(s.files, txtar.File{
+	s.files = append(s.files, &File{
 		Name: file,
 		Data: data,
 	})
 }
 
 func (s Snapshot) With(file string, data []byte) *Snapshot {
-	s.files = append(s.files, txtar.File{
+	s.files = append(s.files, &File{
 		Name: file,
 		Data: data,
 	})
 	return &s
 }
 
+func (s *Snapshot) Commit(ctx *Context) error {
+	if err := os.MkdirAll(filepath.Dir(ctx.Filename), os.ModePerm); err != nil {
+		return err
+	}
+	return os.WriteFile(ctx.Filename, s.Bytes(), 0o644)
+}
+
 func (s *Snapshot) Equal(a *Snapshot) bool {
-	a.filename = s.filename
+	a.ctx = s.ctx
 	if len(s.files) == 0 {
 		return true
 	}
@@ -111,8 +92,5 @@ func (s *Snapshot) Equal(a *Snapshot) bool {
 }
 
 func (s *Snapshot) PostMatched() error {
-	if err := os.MkdirAll(filepath.Dir(s.filename), os.ModePerm); err != nil {
-		return err
-	}
-	return os.WriteFile(s.filename, s.Bytes(), 0o644)
+	return s.Commit(s.ctx)
 }

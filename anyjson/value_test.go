@@ -4,8 +4,8 @@ import (
 	"testing"
 
 	"github.com/go-json-experiment/json"
-	. "github.com/octohelm/x/anyjson"
-	testingx "github.com/octohelm/x/testing"
+	"github.com/octohelm/x/anyjson"
+	. "github.com/octohelm/x/testing/v2"
 )
 
 type Employee struct {
@@ -16,56 +16,68 @@ type Employee struct {
 }
 
 func TestFrom(t *testing.T) {
-	x := struct {
-		Employees []Employee `json:"employees"`
-	}{
-		Employees: []Employee{
-			{
-				Name:    "octo",
-				Salary:  56000,
-				Married: false,
+	t.Run("GIVEN a struct with employees", func(t *testing.T) {
+		x := struct {
+			Employees []Employee `json:"employees"`
+		}{
+			Employees: []Employee{
+				{
+					Name:    "octo",
+					Salary:  56000,
+					Married: false,
+				},
 			},
-		},
-	}
+		}
 
-	obj, err := FromValue(x)
-	testingx.Expect(t, err, testingx.BeNil[error]())
+		// 使用 MustValue 表达：转换必须成功，转换后的 obj 是后续验证的基础
+		obj := MustValue(t, func() (anyjson.Valuer, error) {
+			return anyjson.FromValue(x)
+		})
 
-	testingx.Expect(t, obj.Value(), testingx.Equal[any](Obj{
-		"employees": List{
-			Obj{
-				"name":    "octo",
-				"salary":  56000,
-				"married": false,
-			},
-		},
-	}))
+		Then(t, "it should be converted to Object/List hierarchy",
+			Expect(obj.Value(), Equal[any](anyjson.Obj{
+				"employees": anyjson.List{
+					anyjson.Obj{
+						"name":    "octo",
+						"salary":  56000,
+						"married": false,
+					},
+				},
+			})),
+		)
+	})
 }
 
 func TestUnmarshal(t *testing.T) {
-	var obj Object
-
-	err := json.Unmarshal([]byte(`
+	t.Run("WHEN unmarshal raw JSON to Object", func(t *testing.T) {
+		raw := []byte(`
 {  
     "employees": [
-		{  
-			"name":      "octo",   
-			"salary":     56000,   
-			"married":    false  
-		}  
-	] 
+       {  
+          "name":      "octo",   
+          "salary":     56000,   
+          "married":    false  
+       }  
+    ] 
 }
-`), &obj)
+`)
+		var obj anyjson.Object
+		Then(t, "unmarshal should success",
+			ExpectMust(func() error {
+				return json.Unmarshal(raw, &obj)
+			}),
+		)
 
-	testingx.Expect(t, err, testingx.Be[error](nil))
-
-	testingx.Expect(t, obj.Value(), testingx.Equal[any](Obj{
-		"employees": List{
-			Obj{
-				"name":    "octo",
-				"salary":  56000,
-				"married": false,
-			},
-		},
-	}))
+		Then(t, "the content should match expected Obj/List structure",
+			Expect(obj.Value(), Equal[any](anyjson.Obj{
+				"employees": anyjson.List{
+					anyjson.Obj{
+						"name":    "octo",
+						"salary":  56000,
+						"married": false,
+					},
+				},
+			})),
+		)
+	})
 }

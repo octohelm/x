@@ -36,13 +36,12 @@ func TestFeature(t *testing.T) {
 
 	t.Run("snapshot", bdd.GivenT(func(b bdd.T) {
 		b.Then("match",
-			bdd.EqualDoValue(
-				bdd.Snapshot("test"),
-				func() (*snapshot.Snapshot, error) {
-					return snapshot.Files(
-						snapshot.FileFromRaw("x.txt", []byte("1231")),
-					), nil
-				}),
+			bdd.MatchSnapshot(
+				func(s *snapshot.Snapshot) {
+					s.Add("x.txt", []byte("1231"))
+				},
+				"test",
+			),
 		)
 	}))
 }

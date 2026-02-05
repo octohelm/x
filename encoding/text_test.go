@@ -9,9 +9,11 @@ import (
 	"testing"
 	"time"
 
+	"github.com/octohelm/x/cmp"
 	"github.com/octohelm/x/ptr"
 	"github.com/octohelm/x/slices"
-	"github.com/octohelm/x/testing/bdd"
+
+	. "github.com/octohelm/x/testing/v2"
 )
 
 type Duration time.Duration
@@ -238,56 +240,64 @@ func BenchmarkUnmarshalTextAndMarshalText(b *testing.B) {
 }
 
 func TestUnmarshalTextAndMarshalText(t *testing.T) {
-	b := bdd.FromT(t)
-
 	for _, c := range cases {
-		b.When(fmt.Sprintf("UnmarshalText %s", c.name), func(b bdd.T) {
-			err := UnmarshalText(c.v, []byte(c.text))
-			b.Then("success",
-				bdd.NoError(err),
+		t.Run(fmt.Sprintf("UnmarshalText %s", c.name), func(t *testing.T) {
+			Then(t, "success",
+				ExpectMust(func() error {
+					return UnmarshalText(c.v, []byte(c.text))
+				}),
 			)
 
+			actual := c.v
 			if rv, ok := c.v.(reflect.Value); ok {
-				b.Then("value as expected",
-					bdd.Equal(c.expect, rv.Interface()),
-				)
-			} else {
-				b.Then("value as expected",
-					bdd.Equal(c.expect, c.v),
-				)
+				actual = rv.Interface()
 			}
+
+			Then(t, "value as expected",
+				Expect(actual, Equal(c.expect)),
+			)
 		})
 	}
 
 	for _, c := range cases {
-		b.When(fmt.Sprintf("MarshalText %s", c.name), func(b bdd.T) {
-			text, err := MarshalText(c.v)
-			b.Then("success",
-				bdd.NoError(err),
-			)
-			b.Then("text as expected",
-				bdd.Equal(c.text, string(text)),
+		t.Run(fmt.Sprintf("MarshalText %s", c.name), func(t *testing.T) {
+			// 使用 MustValue 立即获取结果，因为它不仅是断言，还是下一步输入
+			text := MustValue(t, func() ([]byte, error) {
+				return MarshalText(c.v)
+			})
+
+			Then(t, "text as expected",
+				Expect(string(text), Equal(c.text)),
 			)
 		})
 	}
 
-	v2 := struct {
-		PtrString *string
-		Slice     []string
-	}{}
-	rv2 := reflect.ValueOf(v2)
+	t.Run("GIVEN reflect fields", func(t *testing.T) {
+		v2 := struct {
+			PtrString *string
+			Slice     []string
+		}{}
+		rv2 := reflect.ValueOf(v2)
 
-	b.Given("PtrString", func(b bdd.T) {
-		_, err := MarshalText(rv2.FieldByName("PtrString"))
-		b.Then("success",
-			bdd.NoError(err),
-		)
-	})
+		t.Run("PtrString", func(t *testing.T) {
+			Then(t, "success",
+				ExpectMust(func() error {
+					_, err := MarshalText(rv2.FieldByName("PtrString"))
+					return err
+				}),
+			)
+		})
 
-	b.Given("Slice", func(b bdd.T) {
-		_, err := MarshalText(rv2.FieldByName("Slice"))
-		b.Then("success",
-			bdd.HasError(err),
-		)
+		t.Run("Slice", func(t *testing.T) {
+			Then(t, "should has error",
+				ExpectDo(
+					func() error {
+						_, err := MarshalText(rv2.FieldByName("Slice"))
+						return err
+					},
+					Be(cmp.NotNil[error]()),
+				),
+			)
+		})
 	})
 }

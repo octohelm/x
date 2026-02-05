@@ -1,8 +1,7 @@
-package internal
+package deprecated
 
 import (
-	"slices"
-	"strings"
+	"github.com/octohelm/x/testing/lines"
 )
 
 func NewCompareMatcher[A any, E any](action string, match func(a A, e E) bool) func(e E) Matcher[A] {
@@ -37,7 +36,7 @@ var _ MatcherWithNormalizedExpected = &compareMatcher[string, string]{}
 
 func (m *compareMatcher[A, E]) NormalizedExpected() any {
 	switch x := any(m.expected).(type) {
-	case LinesDiffer:
+	case lines.Differ:
 		return x.Lines()
 	default:
 		return x
@@ -48,31 +47,9 @@ var _ MatcherWithActualNormalizer[string] = &compareMatcher[string, string]{}
 
 func (compareMatcher[A, E]) NormalizeActual(a A) any {
 	switch x := any(a).(type) {
-	case LinesDiffer:
+	case lines.Differ:
 		return x.Lines()
 	default:
 		return x
 	}
-}
-
-type Lines []string
-
-type LinesDiffer interface {
-	Lines() Lines
-}
-
-func LinesFromBytes(data []byte) Lines {
-	return slices.Collect(func(yield func(line string) bool) {
-		for line := range strings.Lines(string(data)) {
-			if len(line) > 0 {
-				if line[len(line)-1] == '\n' {
-					line = line[:len(line)-1]
-				}
-			}
-
-			if !yield(line) {
-				return
-			}
-		}
-	})
 }

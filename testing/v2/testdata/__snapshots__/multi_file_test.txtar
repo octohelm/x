@@ -1,0 +1,7 @@
+-- config.yaml --
+env: production
+version: 1.0.0
+-- data.json --
+{"count": 100}
+-- readme.md --
+# Test Document

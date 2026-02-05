@@ -1,29 +1,12 @@
 package bdd
 
 import (
-	"context"
 	"testing"
+
+	"github.com/octohelm/x/testing/internal"
 )
 
-type TB interface {
-	TempDir() string
-
-	Chdir(dir string)
-	Setenv(key, value string)
-
-	Skip(args ...any)
-	Skipped() bool
-
-	Fatal(args ...any)
-
-	Context() context.Context
-
-	Cleanup(func())
-}
-
-type WithHelper interface {
-	Helper()
-}
+type TB = internal.TB
 
 type T interface {
 	TB

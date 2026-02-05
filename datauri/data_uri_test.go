@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/octohelm/x/testing/bdd"
+	. "github.com/octohelm/x/testing/v2"
 )
 
 func TestDataURI(t *testing.T) {
@@ -32,31 +32,36 @@ func TestDataURI(t *testing.T) {
 	}
 
 	for _, c := range cases {
-		bdd.FromT(t).Given(c.URI, func(b bdd.T) {
-			b.When("parse", func(b bdd.T) {
-				dataURI, err := Parse(c.URI)
-				b.Then("success",
-					bdd.NoError(err),
-					bdd.Equal(c.DataURI, *dataURI),
+		t.Run("GIVEN "+c.URI, func(t *testing.T) {
+			t.Run("WHEN parse", func(t *testing.T) {
+				// 使用 MustValue，因为 dataURI 是后续断言的前提
+				dataURI := MustValue(t, func() (*DataURI, error) {
+					return Parse(c.URI)
+				})
+
+				Then(t, "success",
+					Expect(*dataURI, Equal(c.DataURI)),
 				)
 			})
 
-			b.When("encoded", func(b bdd.T) {
-				uri := c.DataURI.Encoded(strings.Contains(c.URI, ";base64,"))
+			t.Run("WHEN encoded", func(t *testing.T) {
+				isBase64 := strings.Contains(c.URI, ";base64,")
+				uri := c.DataURI.Encoded(isBase64)
 
-				b.Then("success",
-					bdd.Equal(c.URI, uri),
+				Then(t, "success",
+					Expect(uri, Equal(c.URI)),
 				)
 			})
 		})
 	}
 
-	bdd.FromT(t).When("parse without data proto", func(b bdd.T) {
-		dataURI, err := Parse("QSBicmllZiBub3Rl")
+	t.Run("WHEN parse without data proto", func(t *testing.T) {
+		dataURI := MustValue(t, func() (*DataURI, error) {
+			return Parse("QSBicmllZiBub3Rl")
+		})
 
-		b.Then("success",
-			bdd.NoError(err),
-			bdd.Equal(string(dataURI.Data), `A brief note`),
+		Then(t, "success",
+			Expect(string(dataURI.Data), Equal(`A brief note`)),
 		)
 	})
 }

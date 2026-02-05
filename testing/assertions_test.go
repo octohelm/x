@@ -66,11 +66,4 @@ func Test(t *testing.T) {
 			HaveStringSuffix("/x"),
 		)
 	})
-
-	t.Run("Should match snapshot", func(t *testing.T) {
-		a := NewSnapshot().
-			With("1.txt", []byte(`123`))
-
-		Expect(t, a, MatchSnapshot("x"))
-	})
 }

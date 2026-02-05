@@ -3,7 +3,7 @@ package testing
 import (
 	"testing"
 
-	"github.com/octohelm/x/testing/internal"
+	"github.com/octohelm/x/testing/internal/deprecated"
 )
 
 func Expect[A any](t testing.TB, actual A, matchers ...Matcher[A]) {
@@ -12,6 +12,6 @@ func Expect[A any](t testing.TB, actual A, matchers ...Matcher[A]) {
 	}
 
 	for i := range matchers {
-		internal.Expect(t, actual, matchers[i])
+		deprecated.Expect(t, actual, matchers[i])
 	}
 }
