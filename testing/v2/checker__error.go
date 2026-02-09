@@ -10,7 +10,7 @@ import (
 func ErrorMatch(re *regexp.Regexp) ValueChecker[error] {
 	return internal.Helper(1, &beChecker[error]{
 		be: func(actual error) error {
-			if re.MatchString(actual.Error()) {
+			if actual != nil && re.MatchString(actual.Error()) {
 				return nil
 			}
 			return &ErrNotEqual{
@@ -24,7 +24,7 @@ func ErrorMatch(re *regexp.Regexp) ValueChecker[error] {
 func ErrorNotMatch(re *regexp.Regexp) ValueChecker[error] {
 	return internal.Helper(1, &beChecker[error]{
 		be: func(actual error) error {
-			if !re.MatchString(actual.Error()) {
+			if actual == nil || !re.MatchString(actual.Error()) {
 				return nil
 			}
 			return &ErrEqual{
