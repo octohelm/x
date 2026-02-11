@@ -35,6 +35,28 @@ func ErrorNotMatch(re *regexp.Regexp) ValueChecker[error] {
 	})
 }
 
+func ErrorAsType[E error]() ValueChecker[error] {
+	return internal.Helper(1, &beChecker[error]{
+		be: func(actual error) error {
+			if _, ok := errors.AsType[E](actual); ok {
+				return nil
+			}
+			return &ErrNotEqual{Expect: new(E), Got: actual}
+		},
+	})
+}
+
+func ErrorNotAsType[E error]() ValueChecker[error] {
+	return internal.Helper(1, &beChecker[error]{
+		be: func(actual error) error {
+			if _, ok := errors.AsType[E](actual); !ok {
+				return nil
+			}
+			return &ErrEqual{NotExpect: new(E), Got: actual}
+		},
+	})
+}
+
 func ErrorAs[E error](expect *E) ValueChecker[error] {
 	return internal.Helper(1, &beChecker[error]{
 		be: func(actual error) error {

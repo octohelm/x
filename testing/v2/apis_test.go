@@ -83,12 +83,12 @@ func TestAPIs(t *testing.T) {
 		t.Run("期望特定错误", func(t *testing.T) {
 			testErr := &ErrTest{Message: "something wrong"}
 
-			Then(t, "应该返回ErrTest类型错误",
+			Then(t, "应该返回 ErrTest 类型错误",
 				ExpectDo(
 					func() error {
 						return testErr
 					},
-					ErrorAs(ptr.Ptr(&ErrTest{})),
+					ErrorAsType[*ErrTest](),
 				),
 			)
 		})
