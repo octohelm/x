@@ -2,7 +2,12 @@ package cmp
 
 import (
 	"cmp"
+	"errors"
+	"fmt"
+	"iter"
 	"reflect"
+
+	"github.com/go-json-experiment/json/jsontext"
 )
 
 func True() func(a bool) error {
@@ -148,4 +153,56 @@ func Len[V any, E int | func(int) error](e E) func(a V) error {
 
 		return nil
 	}
+}
+
+func Every[V any](p func(V) error) func(seq iter.Seq[V]) error {
+	return func(seq iter.Seq[V]) error {
+		i := 0
+		for item := range seq {
+			if err := p(item); err != nil {
+				return wrap(err, "elem", fmt.Sprintf("%d", i), item)
+			}
+			i++
+		}
+		return nil
+	}
+}
+
+func Some[V any](p func(V) error) func(seq iter.Seq[V]) error {
+	return func(seq iter.Seq[V]) error {
+		var lastErr error
+		for item := range seq {
+			if err := p(item); err == nil {
+				return nil
+			} else {
+				lastErr = err
+			}
+		}
+		return &ErrCheck{
+			Topic: "elem",
+			Err:   fmt.Errorf("none of the elements satisfy the predicate (error: %w)", lastErr),
+		}
+	}
+}
+
+func wrap(err error, topic string, tok string, actual any) error {
+	if err == nil {
+		return nil
+	}
+
+	next := &ErrCheck{
+		Topic:  topic,
+		Err:    err,
+		Actual: actual,
+	}
+
+	if child, ok := errors.AsType[*ErrCheck](err); ok {
+		next.Pointer = jsontext.Pointer("").AppendToken(tok) + child.Pointer
+		next.Err = child.Err
+		next.Topic = child.Topic
+	} else {
+		next.Pointer = jsontext.Pointer("").AppendToken(tok)
+	}
+
+	return next
 }

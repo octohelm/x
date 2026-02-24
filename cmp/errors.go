@@ -1,6 +1,10 @@
 package cmp
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/go-json-experiment/json/jsontext"
+)
 
 type ErrCondition struct {
 	Op     string
@@ -22,11 +26,15 @@ func (e *ErrState) Error() string {
 }
 
 type ErrCheck struct {
-	Topic  string
-	Err    error
-	Actual any
+	Topic   string
+	Err     error
+	Actual  any
+	Pointer jsontext.Pointer
 }
 
 func (e *ErrCheck) Error() string {
+	if len(e.Pointer) > 0 {
+		return fmt.Sprintf("%s: %s check failed: %v", e.Pointer, e.Topic, e.Err)
+	}
 	return fmt.Sprintf("%s check failed: %v", e.Topic, e.Err)
 }
