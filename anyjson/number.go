@@ -4,7 +4,6 @@ import (
 	"strconv"
 
 	"github.com/go-json-experiment/json"
-	"github.com/octohelm/x/ptr"
 )
 
 func NumberOf[T number](n T) *Number[T] {
@@ -35,11 +34,11 @@ func (v *Number[T]) Value() any {
 	if v.value == nil {
 		i, err := strconv.ParseInt(string(v.raw), 10, 64)
 		if err == nil {
-			v.value = ptr.Ptr(T(i))
+			v.value = new(T(i))
 		} else {
 			f, err := strconv.ParseFloat(string(v.raw), 64)
 			if err == nil {
-				v.value = ptr.Ptr(T(f))
+				v.value = new(T(f))
 			}
 		}
 	}

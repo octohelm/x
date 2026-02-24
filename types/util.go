@@ -35,7 +35,7 @@ func typeString(t Type) string {
 		buf := bytes.NewBuffer(nil)
 		buf.WriteString("struct {")
 		n := t.NumField()
-		for i := 0; i < n; i++ {
+		for i := range n {
 			buf.WriteRune(' ')
 			f := t.Field(i)
 			if !f.Anonymous() {
@@ -66,7 +66,7 @@ func typeString(t Type) string {
 		buf := bytes.NewBuffer(nil)
 		buf.WriteString("interface {")
 		n := t.NumMethod()
-		for i := 0; i < n; i++ {
+		for i := range n {
 			buf.WriteRune(' ')
 			m := t.Method(i)
 
@@ -93,7 +93,7 @@ func typeString(t Type) string {
 		buf.WriteString("func(")
 		{
 			n := t.NumIn()
-			for i := 0; i < n; i++ {
+			for i := range n {
 				p := t.In(i)
 
 				if i == n-1 && t.IsVariadic() {
@@ -118,7 +118,7 @@ func typeString(t Type) string {
 			if n > 1 {
 				buf.WriteString("(")
 			}
-			for i := 0; i < n; i++ {
+			for i := range n {
 				if i > 0 {
 					buf.WriteString(", ")
 				}
@@ -218,7 +218,7 @@ func typeFor(id string) types.Type {
 					if n := typeParams.Len(); n > 0 {
 						tparams := make([]*types.TypeParam, n)
 
-						for i := 0; i < n; i++ {
+						for i := range n {
 							tparams[i] = types.NewTypeParam(typeParams.At(i).Obj(), TypeFor(tparamNames[i]))
 						}
 

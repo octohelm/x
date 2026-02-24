@@ -8,7 +8,7 @@ import (
 // not like reflect.New, which return PtrTo(reflect.Type),
 func New(tpe reflect.Type) reflect.Value {
 	ptrLevel := 0
-	for tpe.Kind() == reflect.Ptr {
+	for tpe.Kind() == reflect.Pointer {
 		tpe = tpe.Elem()
 		ptrLevel++
 	}
@@ -17,7 +17,7 @@ func New(tpe reflect.Type) reflect.Value {
 
 	if ptrLevel > 0 {
 		for i := 0; i < ptrLevel-1; i++ {
-			tpe = reflect.PtrTo(tpe)
+			tpe = reflect.PointerTo(tpe)
 			nextRv := reflect.New(tpe)
 			nextRv.Elem().Set(rv)
 			rv = nextRv
@@ -29,7 +29,7 @@ func New(tpe reflect.Type) reflect.Value {
 }
 
 func Indirect(rv reflect.Value) reflect.Value {
-	for rv.Kind() == reflect.Ptr {
+	for rv.Kind() == reflect.Pointer {
 		rv = rv.Elem()
 	}
 	return rv
@@ -41,7 +41,7 @@ func IsEmptyValue(v any) bool {
 
 func IsZero(v any) bool {
 	if rv, ok := v.(reflect.Value); ok {
-		if rv.Kind() == reflect.Ptr && rv.IsNil() {
+		if rv.Kind() == reflect.Pointer && rv.IsNil() {
 			return true
 		}
 
@@ -97,7 +97,7 @@ func IsZero(v any) bool {
 }
 
 func isEmptyReflectValue(rv reflect.Value) bool {
-	if rv.Kind() == reflect.Ptr && rv.IsNil() {
+	if rv.Kind() == reflect.Pointer && rv.IsNil() {
 		return true
 	}
 
@@ -123,7 +123,7 @@ func isEmptyReflectValue(rv reflect.Value) bool {
 		return rv.Uint() == 0
 	case reflect.Float32, reflect.Float64:
 		return rv.Float() == 0
-	case reflect.Ptr:
+	case reflect.Pointer:
 		return rv.IsNil()
 	case reflect.Invalid:
 		return true

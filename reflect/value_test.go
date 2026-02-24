@@ -6,7 +6,6 @@ import (
 	"testing"
 
 	"github.com/octohelm/x/cmp"
-	"github.com/octohelm/x/ptr"
 	reflectx "github.com/octohelm/x/reflect"
 	. "github.com/octohelm/x/testing/v2"
 )
@@ -15,17 +14,17 @@ func TestIndirect(t *testing.T) {
 	t.Run("GIVEN various pointer levels", func(t *testing.T) {
 		Then(t, "Indirect should always return the underlying value",
 			Expect(
-				reflectx.Indirect(reflect.ValueOf(ptr.Ptr(1))).Interface(),
+				reflectx.Indirect(reflect.ValueOf(new(1))).Interface(),
 				Equal(reflect.ValueOf(1).Interface()),
 			),
 			Expect(
-				reflectx.Indirect(reflect.New(reflect.TypeOf(0))).Interface(),
+				reflectx.Indirect(reflect.New(reflect.TypeFor[int]())).Interface(),
 				Equal(reflect.ValueOf(0).Interface()),
 			),
 		)
 
 		t.Run("WHEN deep nested pointers", func(t *testing.T) {
-			rv := reflectx.New(reflect.PointerTo(reflect.PointerTo(reflect.PointerTo(reflect.TypeOf("")))))
+			rv := reflectx.New(reflect.PointerTo(reflect.PointerTo(reflect.PointerTo(reflect.TypeFor[string]()))))
 
 			Then(t, "it should unwrap to the base value",
 				Expect(reflectx.Indirect(rv).Interface(), Equal(reflect.ValueOf("").Interface())),
@@ -41,7 +40,7 @@ func (Zero) IsZero() bool {
 }
 
 func TestNew(t *testing.T) {
-	tpeZero := reflect.TypeOf(Zero(""))
+	tpeZero := reflect.TypeFor[Zero]()
 
 	t.Run("NewType", func(t *testing.T) {
 		z := MustValue(t, func() (Zero, error) {

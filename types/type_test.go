@@ -9,7 +9,6 @@ import (
 	"unsafe"
 
 	"github.com/octohelm/x/cmp"
-	"github.com/octohelm/x/ptr"
 	. "github.com/octohelm/x/testing/v2"
 	. "github.com/octohelm/x/types"
 	"github.com/octohelm/x/types/testdata/typ"
@@ -28,8 +27,8 @@ func TestType(t *testing.T) {
 		typ.DeepCompose{},
 		func() *typ.Enum { v := typ.ENUM__ONE; return &v }(),
 		typ.ENUM__ONE,
-		reflect.TypeOf((*encoding.TextMarshaler)(nil)).Elem(),
-		reflect.TypeOf((*typ.SomeMixInterface)(nil)).Elem(),
+		reflect.TypeFor[encoding.TextMarshaler](),
+		reflect.TypeFor[typ.SomeMixInterface](),
 		unsafe.Pointer(t),
 		make(typ.Chan),
 		make(chan string, 100),
@@ -38,7 +37,7 @@ func TestType(t *testing.T) {
 		fn,
 		typ.String(""), "",
 		typ.Bool(true), true,
-		typ.Int(0), ptr.Ptr(1), int(0),
+		typ.Int(0), new(1), int(0),
 		typ.Int8(0), int8(0),
 		typ.Int16(0), int16(0),
 		typ.Int32(0), int32(0),
@@ -97,11 +96,11 @@ func check(t *testing.T, v any) {
 
 		Then(t, "assignability and convertibility should match",
 			Expect(
-				rt.AssignableTo(FromRType(reflect.TypeOf(""))),
+				rt.AssignableTo(FromRType(reflect.TypeFor[string]())),
 				Equal(tt.AssignableTo(FromTType(types.Typ[types.String]))),
 			),
 			Expect(
-				rt.ConvertibleTo(FromRType(reflect.TypeOf(""))),
+				rt.ConvertibleTo(FromRType(reflect.TypeFor[string]())),
 				Equal(tt.ConvertibleTo(FromTType(types.Typ[types.String]))),
 			),
 		)
@@ -168,14 +167,14 @@ func TestTryNew(t *testing.T) {
 	t.Run("TryNew behavior", func(t *testing.T) {
 		Then(t, "RType should support TryNew",
 			Expect(
-				func() bool { _, ok := TryNew(FromRType(reflect.TypeOf(typ.Struct{}))); return ok }(),
+				func() bool { _, ok := TryNew(FromRType(reflect.TypeFor[typ.Struct]())); return ok }(),
 				Be(cmp.True()),
 			),
 		)
 		Then(t, "TType should not support TryNew",
 			Expect(
 				func() bool {
-					_, ok := TryNew(FromTType(NewTypesTypeFromReflectType(reflect.TypeOf(typ.Struct{}))))
+					_, ok := TryNew(FromTType(NewTypesTypeFromReflectType(reflect.TypeFor[typ.Struct]())))
 					return ok
 				}(),
 				Be(cmp.False()),
@@ -198,8 +197,8 @@ func TestEachField(t *testing.T) {
 		}
 
 		Then(t, "RType and TType field names should match",
-			Expect(collect(FromRType(reflect.TypeOf(typ.Struct{}))), Equal(expect)),
-			Expect(collect(FromTType(NewTypesTypeFromReflectType(reflect.TypeOf(typ.Struct{})))), Equal(expect)),
+			Expect(collect(FromRType(reflect.TypeFor[typ.Struct]())), Equal(expect)),
+			Expect(collect(FromTType(NewTypesTypeFromReflectType(reflect.TypeFor[typ.Struct]()))), Equal(expect)),
 		)
 	})
 }

@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/octohelm/x/cmp"
-	"github.com/octohelm/x/ptr"
 	reflectx "github.com/octohelm/x/reflect"
 	. "github.com/octohelm/x/testing/v2"
 )
@@ -58,11 +57,11 @@ func TestFullTypeName(t *testing.T) {
 	t.Run("GIVEN various types", func(t *testing.T) {
 		Then(t, "should return correct full name string",
 			Expect(
-				reflectx.FullTypeName(reflect.TypeOf(ptr.Ptr(1))),
+				reflectx.FullTypeName(reflect.TypeFor[*int]()),
 				Equal("*int"),
 			),
 			Expect(
-				reflectx.FullTypeName(reflect.PointerTo(reflect.TypeOf(1))),
+				reflectx.FullTypeName(reflect.PointerTo(reflect.TypeFor[int]())),
 				Equal("*int"),
 			),
 			Expect(
@@ -70,9 +69,7 @@ func TestFullTypeName(t *testing.T) {
 				Equal("*time.Time"),
 			),
 			Expect(
-				reflectx.FullTypeName(reflect.PointerTo(reflect.TypeOf(struct {
-					Name string
-				}{}))),
+				reflectx.FullTypeName(reflect.PointerTo(reflect.TypeFor[struct{ Name string }]())),
 				Equal("*struct { Name string }"),
 			),
 		)
@@ -81,22 +78,22 @@ func TestFullTypeName(t *testing.T) {
 
 func TestIndirectType(t *testing.T) {
 	t.Run("GIVEN a pointer type", func(t *testing.T) {
-		expected := reflect.TypeOf(1)
+		expected := reflect.TypeFor[int]()
 
 		Then(t, "Deref should return the underlying element type",
-			Expect(reflectx.Deref(reflect.TypeOf(ptr.Ptr(1))), Equal(expected)),
-			Expect(reflectx.Deref(reflect.PointerTo(reflect.TypeOf(1))), Equal(expected)),
+			Expect(reflectx.Deref(reflect.TypeFor[*int]()), Equal(expected)),
+			Expect(reflectx.Deref(reflect.PointerTo(reflect.TypeFor[int]())), Equal(expected)),
 		)
 	})
 
 	t.Run("WHEN having deep nested pointers", func(t *testing.T) {
-		tpe := reflect.TypeOf(1)
-		for i := 0; i < 10; i++ {
+		tpe := reflect.TypeFor[int]()
+		for range 10 {
 			tpe = reflect.PointerTo(tpe)
 		}
 
 		Then(t, "Deref should recursively unwrap all levels",
-			Expect(reflectx.Deref(tpe), Equal(reflect.TypeOf(1))),
+			Expect(reflectx.Deref(tpe), Equal(reflect.TypeFor[int]())),
 		)
 	})
 }

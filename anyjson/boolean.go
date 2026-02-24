@@ -3,8 +3,6 @@ package anyjson
 import (
 	"bytes"
 	"strconv"
-
-	"github.com/octohelm/x/ptr"
 )
 
 func BooleanOf(b bool) *Boolean {
@@ -25,7 +23,7 @@ func (v *Boolean) MarshalJSON() ([]byte, error) {
 
 func (v *Boolean) Value() any {
 	if v.value == nil {
-		v.value = ptr.Ptr(bytes.Equal(v.raw, []byte("true")))
+		v.value = new(bytes.Equal(v.raw, []byte("true")))
 	}
 	return *v.value
 }

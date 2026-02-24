@@ -8,7 +8,6 @@ import (
 
 	"github.com/go-json-experiment/json"
 	"github.com/octohelm/x/cmp"
-	"github.com/octohelm/x/ptr"
 	. "github.com/octohelm/x/testing/v2"
 )
 
@@ -110,7 +109,7 @@ func TestAPIs(t *testing.T) {
 					func() error {
 						return &ErrAnother{Code: 500}
 					},
-					ErrorNotAs(ptr.Ptr(&ErrTest{})),
+					ErrorNotAs(new(&ErrTest{})),
 					ErrorNotIs(os.ErrNotExist),
 				),
 			)
@@ -156,7 +155,7 @@ func TestAPIs(t *testing.T) {
 						func() error {
 							return &ErrTest{Message: "validation failed: email invalid"}
 						},
-						ErrorAs(ptr.Ptr(&ErrTest{})),
+						ErrorAs(new(&ErrTest{})),
 						ErrorMatch(regexp.MustCompile("validation failed")),
 						ErrorMatch(regexp.MustCompile("email invalid")),
 						ErrorNotMatch(regexp.MustCompile("password")),

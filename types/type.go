@@ -67,12 +67,12 @@ func TryNew(u Type) (reflect.Value, bool) {
 	return reflect.Value{}, false
 }
 
-var rtypeEncodingTextMarshaler = FromRType(reflect.TypeOf((*encoding.TextMarshaler)(nil)).Elem())
+var rtypeEncodingTextMarshaler = FromRType(reflect.TypeFor[encoding.TextMarshaler]())
 
 func EncodingTextMarshalerTypeReplacer(u Type) (Type, bool) {
 	switch t := u.(type) {
 	case *RType:
-		return FromRType(reflect.TypeOf("")), t.Implements(rtypeEncodingTextMarshaler)
+		return FromRType(reflect.TypeFor[string]()), t.Implements(rtypeEncodingTextMarshaler)
 	case *TType:
 		return FromTType(types.Typ[types.String]), t.Implements(rtypeEncodingTextMarshaler)
 	}
@@ -121,7 +121,7 @@ func EachField(typ Type, tagForName string, each func(field StructField, fieldDi
 }
 
 func Deref(typ Type) Type {
-	for typ.Kind() == reflect.Ptr {
+	for typ.Kind() == reflect.Pointer {
 		typ = typ.Elem()
 	}
 	return typ
@@ -134,7 +134,7 @@ func FullTypeName(typ Type) string {
 
 	buf := &strings.Builder{}
 
-	for typ.Kind() == reflect.Ptr {
+	for typ.Kind() == reflect.Pointer {
 		buf.WriteByte('*')
 		typ = typ.Elem()
 	}

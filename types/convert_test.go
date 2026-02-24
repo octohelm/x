@@ -38,13 +38,9 @@ func Test_issue_for_chan(t *testing.T) {
 	x := make(chan struct{})
 	defer close(x)
 
-	c := func(recv chan<- struct{}) <-chan struct{} {
-		return x
-	}
-
 	t.Run("GIVEN a set of channels", func(t *testing.T) {
 		t.Run("WHEN reflect Both Chan", func(t *testing.T) {
-			typ := NewTypesTypeFromReflectType(reflect.TypeOf(x))
+			typ := NewTypesTypeFromReflectType(reflect.TypeFor[chan struct{}]())
 
 			Then(t, "should be bidirectional",
 				Expect(typ.String(),
@@ -53,7 +49,7 @@ func Test_issue_for_chan(t *testing.T) {
 		})
 
 		t.Run("WHEN reflect Send Chan", func(t *testing.T) {
-			typ := NewTypesTypeFromReflectType(reflect.TypeOf(c).In(0))
+			typ := NewTypesTypeFromReflectType(reflect.TypeFor[func(recv chan<- struct{}) <-chan struct{}]().In(0))
 
 			Then(t, "should be send-only",
 				Expect(typ.String(),
@@ -62,7 +58,7 @@ func Test_issue_for_chan(t *testing.T) {
 		})
 
 		t.Run("WHEN reflect Recv Chan", func(t *testing.T) {
-			typ := NewTypesTypeFromReflectType(reflect.TypeOf(c).Out(0))
+			typ := NewTypesTypeFromReflectType(reflect.TypeFor[func(recv chan<- struct{}) <-chan struct{}]().Out(0))
 
 			Then(t, "should be receive-only",
 				Expect(typ.String(),

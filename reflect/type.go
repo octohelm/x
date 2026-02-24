@@ -30,7 +30,7 @@ func IsBytes(v any) bool {
 func FullTypeName(rtype reflect.Type) string {
 	buf := bytes.NewBuffer(nil)
 
-	for rtype.Kind() == reflect.Ptr {
+	for rtype.Kind() == reflect.Pointer {
 		buf.WriteByte('*')
 		rtype = rtype.Elem()
 	}
@@ -49,7 +49,7 @@ func FullTypeName(rtype reflect.Type) string {
 }
 
 func Deref(tpe reflect.Type) reflect.Type {
-	if tpe.Kind() == reflect.Ptr {
+	if tpe.Kind() == reflect.Pointer {
 		return Deref(tpe.Elem())
 	}
 	return tpe

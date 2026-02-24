@@ -88,7 +88,7 @@ func NotNil[V any]() func(a V) error {
 func isNil(a any) bool {
 	rv := reflect.ValueOf(a)
 	switch rv.Kind() {
-	case reflect.Ptr, reflect.Map, reflect.Slice, reflect.Chan, reflect.Func, reflect.Interface:
+	case reflect.Pointer, reflect.Map, reflect.Slice, reflect.Chan, reflect.Func, reflect.Interface:
 		if rv.IsNil() {
 			return true
 		}

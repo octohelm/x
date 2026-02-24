@@ -43,9 +43,9 @@ func (ttype *TType) Unwrap() any {
 func methodsOf(typ types.Type) (methods []*TMethod) {
 	switch t := typ.(type) {
 	case *types.Named:
-		for i := 0; i < t.NumMethods(); i++ {
+		for method := range t.Methods() {
 			methodInfo := &TMethod{
-				Func: t.Method(i),
+				Func: method,
 			}
 			if _, ok := methodInfo.Func.Type().(*types.Signature).Recv().Type().(*types.Pointer); ok {
 				methodInfo.Ptr = true
@@ -56,8 +56,7 @@ func methodsOf(typ types.Type) (methods []*TMethod) {
 	case *types.Pointer:
 		methods = append(methods, methodsOf(t.Elem())...)
 	case *types.Struct:
-		for i := 0; i < t.NumFields(); i++ {
-			field := t.Field(i)
+		for field := range t.Fields() {
 			if field.Anonymous() {
 				methods = append(methods, methodsOf(field.Type())...)
 			}
@@ -184,7 +183,7 @@ func (ttype *TType) Implements(u Type) bool {
 		var tt Type = ttype
 		isPtr := false
 
-		for tt.Kind() == reflect.Ptr {
+		for tt.Kind() == reflect.Pointer {
 			tt = tt.Elem()
 			isPtr = true
 		}
@@ -277,7 +276,7 @@ func (ttype *TType) Kind() reflect.Kind {
 	case *types.Interface:
 		return reflect.Interface
 	case *types.Pointer:
-		return reflect.Ptr
+		return reflect.Pointer
 	case *types.Struct:
 		return reflect.Struct
 	case *types.Map:
@@ -345,7 +344,7 @@ func (ttype *TType) Name() string {
 
 		if n := typeParams.Len(); n > 0 {
 			b.WriteString("[")
-			for i := 0; i < n; i++ {
+			for i := range n {
 				if i > 0 {
 					b.WriteString(",")
 				}
@@ -453,7 +452,7 @@ func ConstraintUnderlying(typeParamList *types.TypeParamList, underlying types.T
 		tags := make([]string, n)
 		fields := make([]*types.Var, n)
 
-		for i := 0; i < n; i++ {
+		for i := range n {
 			f := t.Field(i)
 
 			fields[i] = types.NewField(

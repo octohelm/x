@@ -10,7 +10,6 @@ import (
 	"github.com/go-json-experiment/json"
 	"github.com/go-json-experiment/json/jsontext"
 	jsonv1 "github.com/go-json-experiment/json/v1"
-	"github.com/octohelm/x/ptr"
 	"golang.org/x/sync/errgroup"
 )
 
@@ -172,13 +171,13 @@ func FromJSONTextDecoder(decoder *jsontext.Decoder) (Valuer, error) {
 		if err != nil {
 			return nil, err
 		}
-		return &Boolean{raw: value.Clone(), value: ptr.Ptr(false)}, nil
+		return &Boolean{raw: value.Clone(), value: new(false)}, nil
 	case 't':
 		value, err := decoder.ReadValue()
 		if err != nil {
 			return nil, err
 		}
-		return &Boolean{raw: value.Clone(), value: ptr.Ptr(true)}, nil
+		return &Boolean{raw: value.Clone(), value: new(true)}, nil
 	case '"':
 		value, err := decoder.ReadValue()
 		if err != nil {

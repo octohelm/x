@@ -10,7 +10,6 @@ import (
 	"time"
 
 	"github.com/octohelm/x/cmp"
-	"github.com/octohelm/x/ptr"
 	"github.com/octohelm/x/slices"
 
 	. "github.com/octohelm/x/testing/v2"
@@ -75,14 +74,14 @@ var cases = []struct {
 		"Ptr String",
 		rv.FieldByName("PtrString"),
 		"string",
-		ptr.Ptr("string"),
+		new("string"),
 	},
 	{
 		"Ptr Ptr String",
 		rv.FieldByName("PtrPtrString"),
 		"string",
 		func() **string {
-			s := ptr.Ptr("string")
+			s := new("string")
 			return &s
 		}(),
 	},
@@ -90,7 +89,7 @@ var cases = []struct {
 		"Ptr String raw value",
 		&v.String,
 		"ptr",
-		ptr.Ptr("ptr"),
+		new("ptr"),
 	},
 	{
 		"Named String",
@@ -126,7 +125,7 @@ var cases = []struct {
 		"PtrInt",
 		rv.FieldByName("PtrInt"),
 		"1",
-		ptr.Ptr(1),
+		new(1),
 	},
 	{
 		"Uint",
@@ -138,13 +137,13 @@ var cases = []struct {
 		"Int raw value",
 		rv.FieldByName("Int").Addr().Interface(),
 		"1",
-		ptr.Ptr(1),
+		new(1),
 	},
 	{
 		"PtrUint",
 		rv.FieldByName("PtrUint"),
 		"1",
-		ptr.Ptr[uint](1),
+		new(uint(1)),
 	},
 	{
 		"Float",
@@ -156,7 +155,7 @@ var cases = []struct {
 		"PtrFloat",
 		rv.FieldByName("PtrFloat"),
 		"1.1",
-		ptr.Ptr[float32](1.1),
+		new(float32(1.1)),
 	},
 	{
 		"Bool",
@@ -168,7 +167,7 @@ var cases = []struct {
 		"PtrBool",
 		rv.FieldByName("PtrBool"),
 		"true",
-		ptr.Ptr(true),
+		new(true),
 	},
 	{
 		"Bytes",
@@ -197,7 +196,7 @@ var cases = []struct {
 }
 
 func BenchmarkPtrFloat(b *testing.B) {
-	v.PtrFloat = ptr.Ptr[float32](1.1)
+	v.PtrFloat = new(float32(1.1))
 	// rv := reflect.ValueOf(v.PtrFloat).Elem()
 
 	b.Run("append", func(b *testing.B) {

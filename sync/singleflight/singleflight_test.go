@@ -30,7 +30,7 @@ func TestPanicErrorUnwrap(t *testing.T) {
 
 	testCases := []struct {
 		name             string
-		panicValue       interface{}
+		panicValue       any
 		wrappedErrorType bool
 	}{
 		{
@@ -46,12 +46,11 @@ func TestPanicErrorUnwrap(t *testing.T) {
 	}
 
 	for _, tc := range testCases {
-		tc := tc
 
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
 
-			var recovered interface{}
+			var recovered any
 
 			group := &GroupValue[string, string]{}
 
@@ -129,11 +128,9 @@ func TestDoDupSuppress(t *testing.T) {
 
 	const n = 10
 	wg1.Add(1)
-	for i := 0; i < n; i++ {
+	for range n {
 		wg1.Add(1)
-		wg2.Add(1)
-		go func() {
-			defer wg2.Done()
+		wg2.Go(func() {
 			wg1.Done()
 			v, err, _ := g.Do("key", fn)
 			if err != nil {
@@ -143,7 +140,7 @@ func TestDoDupSuppress(t *testing.T) {
 			if v != "bar" {
 				t.Errorf("Do = %T %v; want %q", v, v, "bar")
 			}
-		}()
+		})
 	}
 	wg1.Wait()
 	// At least one goroutine is in fn now and all of them have at
@@ -227,7 +224,7 @@ func TestPanicDo(t *testing.T) {
 	waited := int32(n)
 	panicCount := int32(0)
 	done := make(chan struct{})
-	for i := 0; i < n; i++ {
+	for range n {
 		go func() {
 			defer func() {
 				if err := recover(); err != nil {
@@ -264,7 +261,7 @@ func TestGoexitDo(t *testing.T) {
 	const n = 5
 	waited := int32(n)
 	done := make(chan struct{})
-	for i := 0; i < n; i++ {
+	for range n {
 		go func() {
 			var err error
 			defer func() {

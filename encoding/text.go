@@ -14,7 +14,7 @@ import (
 
 func MarshalText(v any) ([]byte, error) {
 	if rv, ok := v.(reflect.Value); ok {
-		for rv.Kind() == reflect.Ptr {
+		for rv.Kind() == reflect.Pointer {
 			if rv.IsNil() {
 				return nil, nil
 			}
@@ -68,7 +68,7 @@ func MarshalText(v any) ([]byte, error) {
 	default:
 		rv := reflect.ValueOf(x)
 
-		for rv.Kind() == reflect.Ptr {
+		for rv.Kind() == reflect.Pointer {
 			if rv.IsNil() {
 				return nil, nil
 			}
@@ -100,7 +100,7 @@ func MarshalText(v any) ([]byte, error) {
 
 func UnmarshalText(v any, data []byte) error {
 	if rv, ok := v.(reflect.Value); ok {
-		if rv.Kind() != reflect.Ptr {
+		if rv.Kind() != reflect.Pointer {
 			rv = rv.Addr()
 		} else {
 			if rv.IsNil() {
@@ -225,11 +225,11 @@ func UnmarshalText(v any, data []byte) error {
 }
 
 func unmarshalTextToReflectValue(rv reflect.Value, data []byte) error {
-	if rv.Kind() != reflect.Ptr {
+	if rv.Kind() != reflect.Pointer {
 		return fmt.Errorf("unmarshal text need ptr value, but got %#v", rv.Interface())
 	}
 
-	for rv.Kind() == reflect.Ptr {
+	for rv.Kind() == reflect.Pointer {
 		if rv.IsNil() {
 			rv.Set(reflectx.New(rv.Type()))
 		}

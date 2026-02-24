@@ -56,7 +56,7 @@ func PtrTo(t Type) Type {
 	case *TType:
 		return FromTType(types.NewPointer(x.Type))
 	case *RType:
-		return FromRType(reflect.PtrTo(x.Type))
+		return FromRType(reflect.PointerTo(x.Type))
 	}
 	return nil
 }
@@ -180,7 +180,7 @@ func NewTypesTypeFromReflectType(rtype reflect.Type) types.Type {
 		return typ
 	}
 
-	for rtype.Kind() == reflect.Ptr {
+	for rtype.Kind() == reflect.Pointer {
 		rtype = rtype.Elem()
 		ptrCount++
 	}
