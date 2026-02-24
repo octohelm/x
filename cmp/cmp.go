@@ -116,3 +116,36 @@ func NotZero[V any]() func(a V) error {
 		return &ErrState{State: "not zero", Actual: a}
 	}
 }
+
+func Len[V any, E int | func(int) error](e E) func(a V) error {
+	return func(a V) error {
+		t := reflect.TypeOf(a)
+
+		var n int
+
+		switch t.Kind() {
+		case reflect.Slice, reflect.Map, reflect.Chan, reflect.Array, reflect.String:
+			n = reflect.ValueOf(a).Len()
+		default:
+			return &ErrState{State: "lengthable", Actual: a}
+		}
+
+		var err error
+		switch x := any(e).(type) {
+		case int:
+			err = Eq(x)(n)
+		case func(int) error:
+			err = x(n)
+		}
+
+		if err != nil {
+			return &ErrCheck{
+				Topic:  "len",
+				Err:    err,
+				Actual: a,
+			}
+		}
+
+		return nil
+	}
+}

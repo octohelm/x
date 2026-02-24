@@ -192,6 +192,8 @@ func TestAPIs(t *testing.T) {
 
 			Then(t, "Map应该相等",
 				Expect(scores,
+					Be(cmp.Len[map[string]int](2)),
+					Be(cmp.Len[map[string]int](cmp.Gt(1))),
 					Equal(map[string]int{"Alice": 95, "Bob": 87}),
 				),
 			)
