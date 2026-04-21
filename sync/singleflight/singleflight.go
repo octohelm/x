@@ -2,8 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// Package singleflight provides a duplicate function call suppression
-// mechanism.
+// Package singleflight 提供按键去重的并发调用抑制机制。
 package singleflight // import "github.com/catatsuy/sync/singleflight"
 
 import (
@@ -68,10 +67,12 @@ type call[V any] struct {
 	chans []chan<- Result[V]
 }
 
+// Group 表示无返回值场景下的 singleflight 分组。
 type Group[K comparable] struct {
 	g GroupValue[K, struct{}]
 }
 
+// Do 执行 fn，并在相同 key 并发时复用同一次执行。
 func (g *Group[K]) Do(key K, fn func() error) (error, bool) {
 	_, err, shared := g.g.Do(key, func() (struct{}, error) {
 		return struct{}{}, fn()
@@ -79,36 +80,34 @@ func (g *Group[K]) Do(key K, fn func() error) (error, bool) {
 	return err, shared
 }
 
+// DoChan 异步执行 fn，并通过通道返回结果。
 func (g *Group[K]) DoChan(key K, fn func() error) <-chan Result[struct{}] {
 	return g.g.DoChan(key, func() (struct{}, error) {
 		return struct{}{}, fn()
 	})
 }
 
+// Forget 清除指定 key 的进行中状态。
 func (g *Group[K]) Forget(key K) {
 	g.g.Forget(key)
 }
 
-// GroupValue represents a class of work and forms a namespace in
-// which units of work can be executed with duplicate suppression.
+// GroupValue 表示一组按 key 去重的任务命名空间。
 type GroupValue[K comparable, V any] struct {
 	mu sync.Mutex     // protects m
 	m  map[K]*call[V] // lazily initialized
 }
 
-// Result holds the results of Do, so they can be passed
-// on a channel.
+// Result 表示一次调用的结果，可用于 DoChan。
 type Result[V any] struct {
 	Val    V
 	Err    error
 	Shared bool
 }
 
-// Do executes and returns the results of the given function, making
-// sure that only one execution is in-flight for a given key at a
-// time. If a duplicate comes in, the duplicate caller waits for the
-// original to complete and receives the same results.
-// The return value shared indicates whether v was given to multiple callers.
+// Do 执行 fn，并确保同一个 key 在任意时刻只会有一次实际执行。
+//
+// shared 表示本次结果是否被多个调用方共享。
 func (g *GroupValue[K, V]) Do(key K, fn func() (V, error)) (v V, err error, shared bool) {
 	g.mu.Lock()
 	if g.m == nil {
@@ -135,10 +134,7 @@ func (g *GroupValue[K, V]) Do(key K, fn func() (V, error)) (v V, err error, shar
 	return c.val, c.err, c.dups > 0
 }
 
-// DoChan is like Do but returns a channel that will receive the
-// results when they are ready.
-//
-// The returned channel will not be closed.
+// DoChan 与 Do 类似，但通过返回通道异步接收结果。
 func (g *GroupValue[K, V]) DoChan(key K, fn func() (V, error)) <-chan Result[V] {
 	ch := make(chan Result[V], 1)
 	g.mu.Lock()
@@ -225,9 +221,7 @@ func (g *GroupValue[K, V]) doCall(c *call[V], key K, fn func() (V, error)) {
 	}
 }
 
-// Forget tells the singleflight to forget about a key.  Future calls
-// to Do for this key will call the function rather than waiting for
-// an earlier call to complete.
+// Forget 让 singleflight 忘记指定 key 的进行中状态。
 func (g *GroupValue[K, V]) Forget(key K) {
 	g.mu.Lock()
 	delete(g.m, key)

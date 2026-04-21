@@ -1,9 +1,11 @@
 package anyjson
 
+// DiffOption 表示应用到 Diff 的配置项。
 type DiffOption interface {
 	ApplyToDiff(d *differ)
 }
 
+// Diff 计算 live 相对于 template 的差异，并返回可再次用于 Merge 的补丁表示。
 func Diff[T any](template *T, live *T, opts ...DiffOption) (Valuer, error) {
 	m := &differ{
 		arrayMergeKey:     "name",

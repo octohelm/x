@@ -50,7 +50,7 @@ func (Struct) String() string {
 }
 
 type Resource[ID any] struct {
-	ID ID `json:"c"`
+	ID ID `json:"id"`
 }
 
 type Part struct {

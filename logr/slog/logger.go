@@ -9,6 +9,7 @@ import (
 	"github.com/octohelm/x/logr"
 )
 
+// Logger 将标准库 slog.Logger 适配为 logr.Logger。
 func Logger(l *slog.Logger) logr.Logger {
 	return &logger{slog: l, ctx: context.Background()}
 }

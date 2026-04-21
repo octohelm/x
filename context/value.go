@@ -6,7 +6,9 @@ import (
 	"reflect"
 )
 
-// WithValue seem as context.WithValue but without key type comparable check, and be 20x faster
+// WithValue 类似 context.WithValue，但跳过 key 的 comparable 检查。
+//
+// 它适合性能敏感且已自行保证 key 可安全比较的场景。
 func WithValue(parent context.Context, key any, val any) context.Context {
 	if parent == nil {
 		panic("cannot create context from nil parent")

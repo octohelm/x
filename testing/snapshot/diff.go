@@ -7,6 +7,7 @@ import (
 	"github.com/octohelm/x/testing/lines"
 )
 
+// Diff 比较两个快照，并返回 txtar 级别的差异内容。
 func Diff(src *Snapshot, dst *Snapshot) ([]byte, bool) {
 	srcFiles := map[string]*File{}
 	for _, f := range src.files {

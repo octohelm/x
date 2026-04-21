@@ -1,9 +1,13 @@
 package anyjson
 
+// MergeOption 表示应用到 Merge 的配置项。
 type MergeOption interface {
 	ApplyToMerge(m *merger)
 }
 
+// Merge 使用补丁值 patch 合并 base，并返回合并后的值。
+//
+// 当值为对象或数组时会递归处理；其他标量值直接以 patch 覆盖。
 func Merge[T Valuer](base T, patch T, opts ...MergeOption) T {
 	m := &merger{}
 	for _, opt := range opts {

@@ -7,6 +7,7 @@ import (
 	"strings"
 )
 
+// FromTType 将 go/types.Type 包装为统一的 Type 实现。
 func FromTType(ttype types.Type) *TType {
 	switch x := ttype.(type) {
 	case *types.Alias:
@@ -21,6 +22,7 @@ func FromTType(ttype types.Type) *TType {
 	}
 }
 
+// TType 是基于 go/types.Type 的 Type 实现。
 type TType struct {
 	Type types.Type
 
@@ -417,6 +419,7 @@ func (ttype *TType) Elem() Type {
 	return nil
 }
 
+// ConstraintUnderlying 将带类型参数的底层类型替换为约束展开后的具体类型。
 func ConstraintUnderlying(typeParamList *types.TypeParamList, underlying types.Type) types.Type {
 	if typeParamList.Len() == 0 {
 		return underlying
@@ -486,6 +489,7 @@ func (ttype *TType) String() string {
 	return typeString(ttype)
 }
 
+// TStructField 是基于 go/types.Var 的 StructField 实现。
 type TStructField struct {
 	*types.Var
 	TagStr string
@@ -510,6 +514,7 @@ func (f *TStructField) Type() Type {
 	return FromTType(f.Var.Type())
 }
 
+// TMethod 是基于 go/types.Func 的 Method 实现。
 type TMethod struct {
 	Ptr  bool
 	Recv *TType

@@ -4,6 +4,7 @@ import (
 	"fmt"
 )
 
+// ErrNotMatch 表示实际快照与期望快照不一致。
 type ErrNotMatch struct {
 	Name   string
 	Diffed []byte

@@ -4,8 +4,9 @@ import (
 	"reflect"
 )
 
-// New return TypeValue
-// not like reflect.New, which return PtrTo(reflect.Type),
+// New 按给定类型创建零值。
+//
+// 与 reflect.New 不同，当 tpe 不是指针类型时，它返回该类型本身的零值。
 func New(tpe reflect.Type) reflect.Value {
 	ptrLevel := 0
 	for tpe.Kind() == reflect.Pointer {
@@ -28,6 +29,7 @@ func New(tpe reflect.Type) reflect.Value {
 	return rv.Elem()
 }
 
+// Indirect 递归解引用指针值，返回最终元素值。
 func Indirect(rv reflect.Value) reflect.Value {
 	for rv.Kind() == reflect.Pointer {
 		rv = rv.Elem()
@@ -35,10 +37,16 @@ func Indirect(rv reflect.Value) reflect.Value {
 	return rv
 }
 
+// IsEmptyValue 判断值是否为空值。
+//
+// 它是 IsZero 的兼容别名。
 func IsEmptyValue(v any) bool {
 	return IsZero(v)
 }
 
+// IsZero 判断值是否应视为零值。
+//
+// 如果类型实现了 ZeroChecker，会优先使用其自定义判定逻辑。
 func IsZero(v any) bool {
 	if rv, ok := v.(reflect.Value); ok {
 		if rv.Kind() == reflect.Pointer && rv.IsNil() {

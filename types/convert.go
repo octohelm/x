@@ -14,11 +14,15 @@ var (
 )
 
 const (
-	LoadFiles   = packages.NeedName | packages.NeedFiles | packages.NeedCompiledGoFiles
+	// LoadFiles 表示加载包名与文件列表。
+	LoadFiles = packages.NeedName | packages.NeedFiles | packages.NeedCompiledGoFiles
+	// LoadImports 表示在文件信息外继续加载导入关系。
 	LoadImports = LoadFiles | packages.NeedImports
-	LoadTypes   = LoadImports | packages.NeedTypes | packages.NeedTypesSizes
+	// LoadTypes 表示继续加载类型信息与类型尺寸。
+	LoadTypes = LoadImports | packages.NeedTypes | packages.NeedTypesSizes
 )
 
+// NewPackage 按导入路径加载并缓存 go/types.Package。
 func NewPackage(importPath string) *types.Package {
 	if importPath == "" {
 		return nil
@@ -44,6 +48,7 @@ func NewPackage(importPath string) *types.Package {
 	return pkg
 }
 
+// TypeByName 按导入路径和类型名查找 go/types.Type。
 func TypeByName(importPath string, name string) types.Type {
 	if importPath == "" {
 		return TypeFor(name)
@@ -51,6 +56,7 @@ func TypeByName(importPath string, name string) types.Type {
 	return TypeFor(importPath + "." + name)
 }
 
+// PtrTo 返回给定 Type 的指针类型。
 func PtrTo(t Type) Type {
 	switch x := t.(type) {
 	case *TType:
@@ -72,6 +78,7 @@ func typesChanDirFromReflectChan(cd reflect.ChanDir) types.ChanDir {
 	}
 }
 
+// NewTypesTypeFromReflectType 将 reflect.Type 转换为对应的 go/types.Type。
 func NewTypesTypeFromReflectType(rtype reflect.Type) types.Type {
 	underlying := func() types.Type {
 		switch rtype.Kind() {

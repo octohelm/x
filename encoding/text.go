@@ -12,6 +12,7 @@ import (
 	reflectx "github.com/octohelm/x/reflect"
 )
 
+// MarshalText 将常见标量、[]byte 或实现 encoding.TextMarshaler 的值编码为文本。
 func MarshalText(v any) ([]byte, error) {
 	if rv, ok := v.(reflect.Value); ok {
 		for rv.Kind() == reflect.Pointer {
@@ -98,6 +99,7 @@ func MarshalText(v any) ([]byte, error) {
 	}
 }
 
+// UnmarshalText 将文本解码到目标值，支持指针、reflect.Value 和 encoding.TextUnmarshaler。
 func UnmarshalText(v any, data []byte) error {
 	if rv, ok := v.(reflect.Value); ok {
 		if rv.Kind() != reflect.Pointer {

@@ -7,6 +7,7 @@ import (
 	"github.com/octohelm/x/testing/internal"
 )
 
+// ErrorMatch 返回要求 error 文本匹配正则的检查器。
 func ErrorMatch(re *regexp.Regexp) ValueChecker[error] {
 	return internal.Helper(1, &beChecker[error]{
 		be: func(actual error) error {
@@ -21,6 +22,7 @@ func ErrorMatch(re *regexp.Regexp) ValueChecker[error] {
 	})
 }
 
+// ErrorNotMatch 返回要求 error 文本不匹配正则的检查器。
 func ErrorNotMatch(re *regexp.Regexp) ValueChecker[error] {
 	return internal.Helper(1, &beChecker[error]{
 		be: func(actual error) error {
@@ -35,6 +37,7 @@ func ErrorNotMatch(re *regexp.Regexp) ValueChecker[error] {
 	})
 }
 
+// ErrorAsType 返回要求 error 链中可提取到指定类型的检查器。
 func ErrorAsType[E error]() ValueChecker[error] {
 	return internal.Helper(1, &beChecker[error]{
 		be: func(actual error) error {
@@ -46,6 +49,7 @@ func ErrorAsType[E error]() ValueChecker[error] {
 	})
 }
 
+// ErrorNotAsType 返回要求 error 链中不可提取到指定类型的检查器。
 func ErrorNotAsType[E error]() ValueChecker[error] {
 	return internal.Helper(1, &beChecker[error]{
 		be: func(actual error) error {
@@ -57,6 +61,7 @@ func ErrorNotAsType[E error]() ValueChecker[error] {
 	})
 }
 
+// ErrorAs 返回要求 errors.As 可提取到 expect 的检查器。
 func ErrorAs[E error](expect *E) ValueChecker[error] {
 	return internal.Helper(1, &beChecker[error]{
 		be: func(actual error) error {
@@ -68,6 +73,7 @@ func ErrorAs[E error](expect *E) ValueChecker[error] {
 	})
 }
 
+// ErrorNotAs 返回要求 errors.As 不可提取到 expect 的检查器。
 func ErrorNotAs[E error](expect *E) ValueChecker[error] {
 	return internal.Helper(1, &beChecker[error]{
 		be: func(actual error) error {
@@ -79,6 +85,7 @@ func ErrorNotAs[E error](expect *E) ValueChecker[error] {
 	})
 }
 
+// ErrorNotIs 返回要求 errors.Is 不命中 expect 的检查器。
 func ErrorNotIs(expect error) ValueChecker[error] {
 	return internal.Helper(1, &beChecker[error]{
 		be: func(actual error) error {
@@ -90,6 +97,7 @@ func ErrorNotIs(expect error) ValueChecker[error] {
 	})
 }
 
+// ErrorIs 返回要求 errors.Is 命中 expect 的检查器。
 func ErrorIs(expect error) ValueChecker[error] {
 	return internal.Helper(1, &beChecker[error]{
 		be: func(actual error) error {

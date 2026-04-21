@@ -11,11 +11,13 @@ import (
 	"golang.org/x/text/language"
 )
 
+// Context 描述一次快照加载或提交的命名与文件位置。
 type Context struct {
 	Name     string
 	Filename string
 }
 
+// Load 按 Context 定位快照文件并加载内容。
 func (c *Context) Load() (*Snapshot, error) {
 	c.Filename = path.Join(
 		"testdata", "__snapshots__",

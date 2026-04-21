@@ -31,6 +31,14 @@ func TestIndirect(t *testing.T) {
 			)
 		})
 	})
+
+	t.Run("WHEN the pointer is nil", func(t *testing.T) {
+		rv := reflect.Zero(reflect.TypeFor[*string]())
+
+		Then(t, "it should return an invalid value after dereference",
+			Expect(reflectx.Indirect(rv).IsValid(), Be(cmp.False())),
+		)
+	})
 }
 
 type Zero string
@@ -116,4 +124,43 @@ func TestIsEmptyValue(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestIsZero(t *testing.T) {
+	t.Run("反射容器零值判定", func(t *testing.T) {
+		Then(t, "map、slice、string 和 invalid 值应按长度或有效性判断",
+			Expect(reflectx.IsZero(reflect.ValueOf(map[string]int{})), Be(cmp.True())),
+			Expect(reflectx.IsZero(reflect.ValueOf([]int{})), Be(cmp.True())),
+			Expect(reflectx.IsZero(reflect.ValueOf("")), Be(cmp.True())),
+			Expect(reflectx.IsZero(reflect.Value{}), Be(cmp.True())),
+		)
+	})
+
+	t.Run("接口包装值会继续判断其底层元素", func(t *testing.T) {
+		var zero any = ""
+		var nonZero any = "x"
+
+		Then(t, "接口中的零值和非零值应区分开",
+			Expect(reflectx.IsZero(reflect.ValueOf(&zero).Elem()), Be(cmp.True())),
+			Expect(reflectx.IsZero(reflect.ValueOf(&nonZero).Elem()), Be(cmp.False())),
+		)
+	})
+
+	t.Run("nil map 与 nil slice 应视为零值", func(t *testing.T) {
+		var m map[string]int
+		var s []int
+
+		Then(t, "nil 容器应被视为零值",
+			Expect(reflectx.IsZero(m), Be(cmp.True())),
+			Expect(reflectx.IsZero(s), Be(cmp.True())),
+		)
+	})
+
+	t.Run("非零值应返回 false", func(t *testing.T) {
+		Then(t, "非空集合和 true 应被识别为非零值",
+			Expect(reflectx.IsZero([]int{1}), Be(cmp.False())),
+			Expect(reflectx.IsZero(map[string]int{"x": 1}), Be(cmp.False())),
+			Expect(reflectx.IsZero(true), Be(cmp.False())),
+		)
+	})
 }

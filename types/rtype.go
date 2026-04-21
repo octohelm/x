@@ -5,10 +5,12 @@ import (
 	"reflect"
 )
 
+// FromRType 将 reflect.Type 包装为统一的 Type 实现。
 func FromRType(rtype reflect.Type) *RType {
 	return &RType{Type: rtype}
 }
 
+// RType 是基于 reflect.Type 的 Type 实现。
 type RType struct {
 	reflect.Type
 }
@@ -95,6 +97,7 @@ func (rtype *RType) String() string {
 	return typeString(rtype)
 }
 
+// RStructField 是基于 reflect.StructField 的 StructField 实现。
 type RStructField struct {
 	StructField reflect.StructField
 }
@@ -119,6 +122,7 @@ func (f *RStructField) Anonymous() bool {
 	return f.StructField.Anonymous
 }
 
+// RMethod 是基于 reflect.Method 的 Method 实现。
 type RMethod struct {
 	Method reflect.Method
 }

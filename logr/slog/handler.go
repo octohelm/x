@@ -5,12 +5,14 @@ import (
 	"log/slog"
 )
 
+// EnableLevel 配置 slog 适配器允许输出的最低级别。
 func EnableLevel(lvl slog.Level) func(h *handler) {
 	return func(h *handler) {
 		h.lvl = lvl
 	}
 }
 
+// Default 基于 slog.Default 创建一个带可选配置的 Logger。
 func Default(optFns ...func(h *handler)) *slog.Logger {
 	h := &handler{h: slog.Default().Handler()}
 	for _, fn := range optFns {

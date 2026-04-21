@@ -155,6 +155,7 @@ func init() {
 	}
 }
 
+// TypeFor 按类型标识字符串解析并缓存 go/types.Type。
 func TypeFor(id string) types.Type {
 	if v, ok := typesCache.Load(id); ok {
 		return v.(types.Type)

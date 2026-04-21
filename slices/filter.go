@@ -1,5 +1,6 @@
 package slices
 
+// Filter 返回由满足 filter 条件的元素组成的新切片。
 func Filter[E any](list []E, filter func(e E) bool) []E {
 	out := make([]E, 0, len(list))
 	for _, e := range list {

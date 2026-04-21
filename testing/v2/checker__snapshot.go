@@ -10,12 +10,15 @@ import (
 	"github.com/octohelm/x/testing/snapshot"
 )
 
+// SnapshotFileFromRaw 根据文件名和原始内容创建快照文件。
 func SnapshotFileFromRaw(filename string, raw []byte) *SnapshotFile {
 	return snapshot.FileFromRaw(filename, raw)
 }
 
+// Snapshot 表示一组待校验的快照文件序列。
 type Snapshot = iter.Seq[*SnapshotFile]
 
+// SnapshotOf 将若干快照文件组装为 Snapshot。
 func SnapshotOf(files ...*SnapshotFile) Snapshot {
 	return func(yield func(*SnapshotFile) bool) {
 		for _, file := range files {
@@ -26,10 +29,13 @@ func SnapshotOf(files ...*SnapshotFile) Snapshot {
 	}
 }
 
+// SnapshotFile 是快照文件的别名。
 type SnapshotFile = snapshot.File
 
+// ErrNotMatch 是快照不匹配错误的别名。
 type ErrNotMatch = snapshot.ErrNotMatch
 
+// MatchSnapshot 返回基于名称匹配测试快照的检查器。
 func MatchSnapshot[Name comparable](name Name) ValueChecker[Snapshot] {
 	return internal.Helper(1, &snapshotMatcher{
 		ctx: &snapshot.Context{

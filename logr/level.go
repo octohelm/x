@@ -5,22 +5,21 @@ import (
 	"strings"
 )
 
-// Level type
+// Level 表示日志级别。
 type Level uint32
 
 const (
-	// ErrorLevel level. Logs. Used for errors that should definitely be noted.
-	// Commonly used for hooks to send errors to an error tracking service.
+	// ErrorLevel 表示错误级别。
 	ErrorLevel Level = iota
-	// WarnLevel level. Non-critical entries that deserve eyes.
+	// WarnLevel 表示警告级别。
 	WarnLevel
-	// InfoLevel level. General operational entries about what's going on inside the
-	// application.
+	// InfoLevel 表示信息级别。
 	InfoLevel
-	// DebugLevel level. Usually only enabled when debugging. Very verbose logging.
+	// DebugLevel 表示调试级别。
 	DebugLevel
 )
 
+// String 返回级别的文本表示。
 func (level Level) String() string {
 	if b, err := level.MarshalText(); err == nil {
 		return string(b)
@@ -29,7 +28,7 @@ func (level Level) String() string {
 	}
 }
 
-// ParseLevel takes a string level and returns the Logrus log level constant.
+// ParseLevel 解析文本级别。
 func ParseLevel(lvl string) (Level, error) {
 	switch strings.ToLower(lvl) {
 	case "error":
@@ -44,6 +43,7 @@ func ParseLevel(lvl string) (Level, error) {
 	return 0, fmt.Errorf("not a valid logrus Level: %q", lvl)
 }
 
+// UnmarshalText 从文本解析日志级别。
 func (level *Level) UnmarshalText(text []byte) error {
 	l, err := ParseLevel(string(text))
 	if err != nil {
@@ -53,6 +53,7 @@ func (level *Level) UnmarshalText(text []byte) error {
 	return nil
 }
 
+// MarshalText 将日志级别编码为文本。
 func (level Level) MarshalText() ([]byte, error) {
 	switch level {
 	case DebugLevel:

@@ -6,11 +6,13 @@ import (
 	"strings"
 )
 
+// File 表示快照中的单个文件。
 type File = struct {
 	Name string // name of file ("foo/bar.txt")
 	Data []byte // text content of file
 }
 
+// FileFromRaw 根据文件名和原始字节创建快照文件。
 func FileFromRaw(filename string, data []byte) *File {
 	return &File{
 		Name: filename,
@@ -18,6 +20,7 @@ func FileFromRaw(filename string, data []byte) *File {
 	}
 }
 
+// FilesSeq 将 txtar 风格内容按文件顺序拆分为迭代序列。
 func FilesSeq(data []byte) iter.Seq[*File] {
 	return func(yield func(*File) bool) {
 		var name string

@@ -2,6 +2,9 @@ package anyjson
 
 import "slices"
 
+// Sorted 返回递归按对象键排序后的副本。
+//
+// 这个函数常用于稳定化 JSON 输出，便于快照测试或文本比较。
 func Sorted[T Valuer](v T) T {
 	switch x := any(v).(type) {
 	case *Object:

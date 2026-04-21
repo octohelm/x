@@ -5,6 +5,7 @@ import (
 	"strings"
 )
 
+// ParseStructTags 将结构体标签文本拆解为键到 StructTag 的映射。
 func ParseStructTags(tag string) map[string]StructTag {
 	tagFlags := map[string]StructTag{}
 
@@ -51,8 +52,10 @@ func ParseStructTags(tag string) map[string]StructTag {
 	return tagFlags
 }
 
+// StructTag 表示单个标签键对应的原始值。
 type StructTag string
 
+// Name 返回标签中的主名称部分。
 func (t StructTag) Name() string {
 	s := string(t)
 
@@ -66,9 +69,17 @@ func (t StructTag) Name() string {
 	return s
 }
 
+// HasFlag 判断标签中是否包含指定 flag。
 func (t StructTag) HasFlag(flag string) bool {
-	if i := strings.Index(string(t), flag); i > 0 {
-		return true
+	s := string(t)
+
+	if i := strings.Index(s, ","); i >= 0 {
+		for _, part := range strings.Split(s[i+1:], ",") {
+			if part == flag {
+				return true
+			}
+		}
 	}
+
 	return false
 }

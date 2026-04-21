@@ -25,6 +25,7 @@ func (f *field) Set(v Valuer) {
 	f.value = v
 }
 
+// Object 表示保持键插入顺序的 JSON 对象。
 type Object struct {
 	props     map[string]*list.Element[*field]
 	ll        list.List[*field]
@@ -46,10 +47,12 @@ func (v *Object) Value() any {
 	return m
 }
 
+// Len 返回对象中的键值对数量。
 func (v *Object) Len() int {
 	return len(v.props)
 }
 
+// KeyValues 以插入顺序遍历对象中的键和值。
 func (v *Object) KeyValues() iter.Seq2[string, Valuer] {
 	return func(yield func(string, Valuer) bool) {
 		for el := v.ll.Front(); el != nil; el = el.Next() {
@@ -60,6 +63,7 @@ func (v *Object) KeyValues() iter.Seq2[string, Valuer] {
 	}
 }
 
+// Get 返回指定键对应的值。
 func (v *Object) Get(key string) (Valuer, bool) {
 	if v.props != nil {
 		v, ok := v.props[key]
@@ -70,6 +74,9 @@ func (v *Object) Get(key string) (Valuer, bool) {
 	return nil, false
 }
 
+// Set 设置键对应的值。
+//
+// 当 key 首次写入时返回 true；更新已有键时返回 false。
 func (v *Object) Set(key string, value Valuer) bool {
 	v.init()
 
@@ -84,6 +91,7 @@ func (v *Object) Set(key string, value Valuer) bool {
 	return true
 }
 
+// Delete 删除指定键，并返回是否实际删除了元素。
 func (v *Object) Delete(key string) (didDelete bool) {
 	if v.props == nil {
 		return false
@@ -154,6 +162,7 @@ func (v *Object) UnmarshalJSONFrom(d *jsontext.Decoder) error {
 	return nil
 }
 
+// UnmarshalJSON 将 JSON 文本解码为对象。
 func (v *Object) UnmarshalJSON(b []byte) error {
 	o := &Object{}
 
@@ -166,6 +175,7 @@ func (v *Object) UnmarshalJSON(b []byte) error {
 	return nil
 }
 
+// MarshalJSON 将对象编码为 JSON 文本，并保留键的插入顺序。
 func (v Object) MarshalJSON() ([]byte, error) {
 	b := bytes.NewBuffer(nil)
 
@@ -192,6 +202,7 @@ func (v Object) MarshalJSON() ([]byte, error) {
 	return b.Bytes(), nil
 }
 
+// String 返回对象的 JSON 文本表示。
 func (v *Object) String() string {
 	return ToString(v)
 }

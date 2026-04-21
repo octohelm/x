@@ -10,14 +10,17 @@ import (
 	"github.com/go-json-experiment/json/jsontext"
 )
 
+// True 返回要求实际值为 true 的谓词。
 func True() func(a bool) error {
 	return Eq(true)
 }
 
+// False 返回要求实际值为 false 的谓词。
 func False() func(a bool) error {
 	return Eq(false)
 }
 
+// Eq 返回要求实际值等于期望值的谓词。
 func Eq[V comparable](e V) func(a V) error {
 	return func(a V) error {
 		if a == e {
@@ -27,6 +30,7 @@ func Eq[V comparable](e V) func(a V) error {
 	}
 }
 
+// Neq 返回要求实际值不等于期望值的谓词。
 func Neq[V comparable](e V) func(a V) error {
 	return func(a V) error {
 		if a != e {
@@ -36,6 +40,7 @@ func Neq[V comparable](e V) func(a V) error {
 	}
 }
 
+// Gt 返回要求实际值大于期望值的谓词。
 func Gt[V cmp.Ordered](e V) func(a V) error {
 	return func(a V) error {
 		if a > e {
@@ -45,6 +50,7 @@ func Gt[V cmp.Ordered](e V) func(a V) error {
 	}
 }
 
+// Gte 返回要求实际值大于等于期望值的谓词。
 func Gte[V cmp.Ordered](e V) func(a V) error {
 	return func(a V) error {
 		if a >= e {
@@ -54,6 +60,7 @@ func Gte[V cmp.Ordered](e V) func(a V) error {
 	}
 }
 
+// Lt 返回要求实际值小于期望值的谓词。
 func Lt[V cmp.Ordered](e V) func(a V) error {
 	return func(a V) error {
 		if a < e {
@@ -63,6 +70,7 @@ func Lt[V cmp.Ordered](e V) func(a V) error {
 	}
 }
 
+// Lte 返回要求实际值小于等于期望值的谓词。
 func Lte[V cmp.Ordered](e V) func(a V) error {
 	return func(a V) error {
 		if a <= e {
@@ -72,6 +80,7 @@ func Lte[V cmp.Ordered](e V) func(a V) error {
 	}
 }
 
+// Nil 返回要求实际值为 nil 的谓词。
 func Nil[V any]() func(a V) error {
 	return func(a V) error {
 		if isNil(a) {
@@ -81,6 +90,7 @@ func Nil[V any]() func(a V) error {
 	}
 }
 
+// NotNil 返回要求实际值非 nil 的谓词。
 func NotNil[V any]() func(a V) error {
 	return func(a V) error {
 		if !isNil(a) {
@@ -104,6 +114,7 @@ func isNil(a any) bool {
 	return false
 }
 
+// Zero 返回要求实际值为零值的谓词。
 func Zero[V any]() func(a V) error {
 	return func(a V) error {
 		if reflect.ValueOf(a).IsZero() {
@@ -113,6 +124,7 @@ func Zero[V any]() func(a V) error {
 	}
 }
 
+// NotZero 返回要求实际值不为零值的谓词。
 func NotZero[V any]() func(a V) error {
 	return func(a V) error {
 		if !reflect.ValueOf(a).IsZero() {
@@ -122,6 +134,9 @@ func NotZero[V any]() func(a V) error {
 	}
 }
 
+// Len 返回针对长度值的谓词。
+//
+// e 可以是固定长度，也可以是进一步校验长度的谓词。
 func Len[V any, E int | func(int) error](e E) func(a V) error {
 	return func(a V) error {
 		t := reflect.TypeOf(a)
@@ -155,6 +170,7 @@ func Len[V any, E int | func(int) error](e E) func(a V) error {
 	}
 }
 
+// Every 返回要求序列中每个元素都满足谓词的谓词。
 func Every[V any](p func(V) error) func(seq iter.Seq[V]) error {
 	return func(seq iter.Seq[V]) error {
 		i := 0
@@ -168,6 +184,7 @@ func Every[V any](p func(V) error) func(seq iter.Seq[V]) error {
 	}
 }
 
+// Some 返回要求序列中至少一个元素满足谓词的谓词。
 func Some[V any](p func(V) error) func(seq iter.Seq[V]) error {
 	return func(seq iter.Seq[V]) error {
 		var lastErr error

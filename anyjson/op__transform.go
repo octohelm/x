@@ -2,6 +2,9 @@ package anyjson
 
 import "context"
 
+// Transform 深度遍历 v，并对叶子值应用 transform。
+//
+// keyPath 会按对象键与数组索引记录当前位置。
 func Transform(ctx context.Context, v Valuer, transform func(v Valuer, keyPath ...any) Valuer) Valuer {
 	t := &transformer{
 		transform: transform,

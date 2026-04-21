@@ -13,10 +13,12 @@ import (
 	"golang.org/x/sync/errgroup"
 )
 
+// Equal 判断两个 Valuer 在原生 Go 值层面是否相等。
 func Equal(a Valuer, b Valuer) bool {
 	return reflect.DeepEqual(a.Value(), b.Value())
 }
 
+// MustFromValue 将任意 Go 值转换为 Valuer，失败时 panic。
 func MustFromValue(value any) Valuer {
 	x, err := FromValue(value)
 	if err != nil {
@@ -25,6 +27,7 @@ func MustFromValue(value any) Valuer {
 	return x
 }
 
+// As 将 Valuer 反序列化到 target 指向的目标值中。
 func As[T Valuer](valuer T, target any) error {
 	raw, err := valuer.MarshalJSON()
 	if err != nil {
@@ -33,6 +36,9 @@ func As[T Valuer](valuer T, target any) error {
 	return json.Unmarshal(raw, target)
 }
 
+// FromValue 将任意 Go 值转换为 anyjson 的值表示。
+//
+// 它会保留对象、数组、标量和 nil 的结构语义，便于后续做 diff、merge 或 transform。
 func FromValue(value any) (Valuer, error) {
 	if value == nil {
 		return &Null{}, nil
@@ -133,6 +139,9 @@ func (p *payload) UnmarshalJSONFrom(decoder *jsontext.Decoder) error {
 	return nil
 }
 
+// Valuer 表示 anyjson 中统一的 JSON 值抽象。
+//
+// 实现类型需要同时支持 JSON 编码、字符串表示和原生 Go 值读取。
 type Valuer interface {
 	json.Marshaler
 
@@ -141,11 +150,13 @@ type Valuer interface {
 	Value() any
 }
 
+// ToString 以 JSON 文本形式返回 valuer 的字符串表示。
 func ToString(valuer Valuer) string {
 	data, _ := valuer.MarshalJSON()
 	return string(data)
 }
 
+// FromJSONTextDecoder 从 jsontext.Decoder 当前位置读取一个 JSON 值并转换为 Valuer。
 func FromJSONTextDecoder(decoder *jsontext.Decoder) (Valuer, error) {
 	switch decoder.PeekKind() {
 	case '{':

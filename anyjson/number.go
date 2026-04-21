@@ -6,6 +6,7 @@ import (
 	"github.com/go-json-experiment/json"
 )
 
+// NumberOf 创建一个数字值节点。
 func NumberOf[T number](n T) *Number[T] {
 	return &Number[T]{
 		value: &n,
@@ -18,6 +19,7 @@ type number interface {
 		~float32 | ~float64
 }
 
+// Number 表示 JSON 数字值。
 type Number[T number] struct {
 	value *T
 	raw   []byte
@@ -48,6 +50,7 @@ func (v *Number[T]) Value() any {
 	return nil
 }
 
+// String 返回数字的 JSON 文本表示。
 func (v *Number[T]) String() string {
 	return ToString(v)
 }

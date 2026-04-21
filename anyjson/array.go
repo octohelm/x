@@ -11,10 +11,12 @@ import (
 	jsonv1 "github.com/go-json-experiment/json/v1"
 )
 
+// Array 表示 JSON 数组。
 type Array struct {
 	items []Valuer
 }
 
+// Value 返回数组对应的原生 Go 切片表示。
 func (v *Array) Value() any {
 	list := make([]any, len(v.items))
 	for i := range list {
@@ -23,10 +25,12 @@ func (v *Array) Value() any {
 	return list
 }
 
+// Len 返回数组元素个数。
 func (v *Array) Len() int {
 	return len(v.items)
 }
 
+// Values 按顺序遍历数组中的所有值。
 func (v *Array) Values() iter.Seq[Valuer] {
 	return func(yield func(Valuer) bool) {
 		for _, v := range v.items {
@@ -37,6 +41,7 @@ func (v *Array) Values() iter.Seq[Valuer] {
 	}
 }
 
+// IndexedValues 按顺序遍历数组中的索引和值。
 func (v *Array) IndexedValues() iter.Seq2[int, Valuer] {
 	return func(yield func(int, Valuer) bool) {
 		for i, v := range v.items {
@@ -84,11 +89,13 @@ func (v *Array) UnmarshalJSONFrom(d *jsontext.Decoder) error {
 	return nil
 }
 
+// UnmarshalJSON 将 JSON 文本解码为数组。
 func (v *Array) UnmarshalJSON(b []byte) error {
 	d := jsontext.NewDecoder(bytes.NewReader(b), jsonv1.DefaultOptionsV1())
 	return v.UnmarshalJSONFrom(d)
 }
 
+// MarshalJSON 将数组编码为 JSON 文本。
 func (v *Array) MarshalJSON() ([]byte, error) {
 	b := bytes.NewBuffer(nil)
 
@@ -112,14 +119,17 @@ func (v *Array) MarshalJSON() ([]byte, error) {
 	return b.Bytes(), nil
 }
 
+// String 返回数组的 JSON 文本表示。
 func (v *Array) String() string {
 	return ToString(v)
 }
 
+// Append 追加一个元素到数组末尾。
 func (v *Array) Append(item Valuer) {
 	v.items = append(v.items, item)
 }
 
+// Index 返回指定索引位置的元素。
 func (v *Array) Index(i int) (Valuer, bool) {
 	if i < 0 || i >= len(v.items) {
 		return nil, false

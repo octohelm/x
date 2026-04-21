@@ -10,9 +10,9 @@ import (
 	reflectx "github.com/octohelm/x/reflect"
 )
 
-// interface like reflect.Type but only for data type
+// Type 定义对 reflect.Type 与 go/types.Type 的统一抽象。
 type Type interface {
-	// Unwrap return reflect.Type or types.Type
+	// Unwrap 返回底层的 reflect.Type 或 types.Type。
 	Unwrap() any
 
 	Name() string
@@ -45,12 +45,14 @@ type Type interface {
 	Out(i int) Type
 }
 
+// Method 表示统一抽象下的方法元数据。
 type Method interface {
 	PkgPath() string
 	Name() string
 	Type() Type
 }
 
+// StructField 表示统一抽象下的结构体字段元数据。
 type StructField interface {
 	PkgPath() string
 	Name() string
@@ -59,6 +61,9 @@ type StructField interface {
 	Anonymous() bool
 }
 
+// TryNew 尝试为 Type 创建一个新的零值。
+//
+// 当前仅支持基于 reflect.Type 的 RType。
 func TryNew(u Type) (reflect.Value, bool) {
 	switch t := u.(type) {
 	case *RType:
@@ -69,6 +74,7 @@ func TryNew(u Type) (reflect.Value, bool) {
 
 var rtypeEncodingTextMarshaler = FromRType(reflect.TypeFor[encoding.TextMarshaler]())
 
+// EncodingTextMarshalerTypeReplacer 在类型实现 encoding.TextMarshaler 时返回 string 替代类型。
 func EncodingTextMarshalerTypeReplacer(u Type) (Type, bool) {
 	switch t := u.(type) {
 	case *RType:
@@ -79,6 +85,7 @@ func EncodingTextMarshalerTypeReplacer(u Type) (Type, bool) {
 	return nil, false
 }
 
+// EachField 遍历结构体字段，并按标签规则展开匿名嵌入字段。
 func EachField(typ Type, tagForName string, each func(field StructField, fieldDisplayName string, omitempty bool) bool, tagsForKeepingNested ...string) {
 	for i := 0; i < typ.NumField(); i++ {
 		field := typ.Field(i)
@@ -120,6 +127,7 @@ func EachField(typ Type, tagForName string, each func(field StructField, fieldDi
 	}
 }
 
+// Deref 递归解引用指针类型。
 func Deref(typ Type) Type {
 	for typ.Kind() == reflect.Pointer {
 		typ = typ.Elem()
@@ -127,6 +135,7 @@ func Deref(typ Type) Type {
 	return typ
 }
 
+// FullTypeName 返回包含包路径和指针层级的完整类型名。
 func FullTypeName(typ Type) string {
 	if typ == nil {
 		return "nil"
@@ -152,6 +161,7 @@ func FullTypeName(typ Type) string {
 	return buf.String()
 }
 
+// FieldDisplayName 根据结构体标签计算字段显示名及相关标志。
 func FieldDisplayName(structTag reflect.StructTag, namedTagKey string, defaultName string) (string, bool, bool) {
 	jsonTag, exists := structTag.Lookup(namedTagKey)
 	if !exists {

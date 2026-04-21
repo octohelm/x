@@ -7,6 +7,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 )
 
+// Diff 生成 oldLines 到 newLines 的逐行差异文本。
 func Diff(oldLines Lines, newLines Lines) []byte {
 	r := &diffReporter{
 		ret: &bytes.Buffer{},

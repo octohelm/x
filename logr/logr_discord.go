@@ -2,6 +2,7 @@ package logr
 
 import "context"
 
+// Discard 返回一个丢弃所有输出的 Logger。
 func Discard() Logger {
 	return &discardLogger{}
 }

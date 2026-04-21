@@ -1,6 +1,8 @@
 package list
 
-import "testing"
+import (
+	"testing"
+)
 
 func checkListLen[T any](t *testing.T, l *List[T], len int) bool {
 	if n := l.Len(); n != len {
@@ -53,6 +55,14 @@ func checkListPointers[T any](t *testing.T, l *List[T], es []*Element[T]) {
 		if n := e.Next(); n != Next {
 			t.Errorf("elt[%d](%p).Next() = %p, want %p", i, e, n, Next)
 		}
+	}
+}
+
+func checkEqual[T comparable](t *testing.T, summary string, actual, expected T) {
+	t.Helper()
+
+	if actual != expected {
+		t.Fatalf("%s: got %v, want %v", summary, actual, expected)
 	}
 }
 
@@ -140,6 +150,34 @@ func TestList(t *testing.T) {
 	checkListPointers(t, l, []*Element[int]{})
 }
 
+func TestZeroValueList(t *testing.T) {
+	t.Run("零值链表可直接读取和清空", func(t *testing.T) {
+		var l List[int]
+		var zero Element[int]
+
+		checkEqual(t, "零值链表长度", l.Len(), 0)
+		checkEqual(t, "零值链表 Front", l.Front(), (*Element[int])(nil))
+		checkEqual(t, "零值链表 Back", l.Back(), (*Element[int])(nil))
+		checkEqual(t, "零值元素 Next", zero.Next(), (*Element[int])(nil))
+		checkEqual(t, "零值元素 Prev", zero.Prev(), (*Element[int])(nil))
+
+		checkEqual(t, "移除零值元素返回零值", l.Remove(&zero), 0)
+		checkEqual(t, "移除零值元素后长度", l.Len(), 0)
+		checkEqual(t, "移除零值元素后 Front", l.Front(), (*Element[int])(nil))
+		checkEqual(t, "移除零值元素后 Back", l.Back(), (*Element[int])(nil))
+	})
+
+	t.Run("零值链表支持空链表自拷贝", func(t *testing.T) {
+		var l List[int]
+
+		l.PushBackList(&l)
+		checkList(t, &l, nil)
+
+		l.PushFrontList(&l)
+		checkList(t, &l, nil)
+	})
+}
+
 func checkList[T int](t *testing.T, l *List[T], es []T) {
 	if !checkListLen(t, l, len(es)) {
 		return
@@ -198,6 +236,30 @@ func TestExtending(t *testing.T) {
 	checkList(t, l1, []int{1, 2, 3})
 	l1.PushFrontList(l3)
 	checkList(t, l1, []int{1, 2, 3})
+}
+
+func TestSelfCopyUsesSnapshotOrder(t *testing.T) {
+	t.Run("尾部自拷贝只追加原有元素", func(t *testing.T) {
+		l := New[int]()
+		l.PushBack(1)
+		l.PushBack(2)
+		l.PushBack(3)
+
+		l.PushBackList(l)
+
+		checkList(t, l, []int{1, 2, 3, 1, 2, 3})
+	})
+
+	t.Run("头部自拷贝只复制原有元素", func(t *testing.T) {
+		l := New[int]()
+		l.PushBack(1)
+		l.PushBack(2)
+		l.PushBack(3)
+
+		l.PushFrontList(l)
+
+		checkList(t, l, []int{1, 2, 3, 1, 2, 3})
+	})
 }
 
 func TestRemove(t *testing.T) {
@@ -284,6 +346,42 @@ func TestMove(t *testing.T) {
 	checkListPointers(t, l, []*Element[int]{e1, e3, e2, e4})
 }
 
+func TestBoundaryMoveKeepsOrder(t *testing.T) {
+	t.Run("移动到相同边界位置时保持顺序", func(t *testing.T) {
+		l := New[int]()
+		e1 := l.PushBack(1)
+		e2 := l.PushBack(2)
+		e3 := l.PushBack(3)
+
+		l.MoveBefore(e1, e2)
+		checkListPointers(t, l, []*Element[int]{e1, e2, e3})
+
+		l.MoveAfter(e3, e2)
+		checkListPointers(t, l, []*Element[int]{e1, e2, e3})
+
+		l.MoveToFront(e1)
+		checkListPointers(t, l, []*Element[int]{e1, e2, e3})
+
+		l.MoveToBack(e3)
+		checkListPointers(t, l, []*Element[int]{e1, e2, e3})
+	})
+
+	t.Run("已移除元素的移动应为 no-op", func(t *testing.T) {
+		l := New[int]()
+		e1 := l.PushBack(1)
+		e2 := l.PushBack(2)
+		e3 := l.PushBack(3)
+
+		l.Remove(e2)
+		l.MoveToFront(e2)
+		l.MoveToBack(e2)
+		l.MoveBefore(e2, e1)
+		l.MoveAfter(e2, e3)
+
+		checkListPointers(t, l, []*Element[int]{e1, e3})
+	})
+}
+
 // Test PushFront, PushBack, PushFrontList, PushBackList with uninitialized List
 func TestZeroList(t *testing.T) {
 	l1 := new(List[int])
@@ -309,7 +407,9 @@ func TestInsertBeforeUnknownMark(t *testing.T) {
 	l.PushBack(1)
 	l.PushBack(2)
 	l.PushBack(3)
-	l.InsertBefore(1, new(Element[int]))
+
+	checkEqual(t, "非法位置前插入应返回 nil", l.InsertBefore(1, new(Element[int])), (*Element[int])(nil))
+
 	checkList(t, &l, []int{1, 2, 3})
 }
 
@@ -319,7 +419,9 @@ func TestInsertAfterUnknownMark(t *testing.T) {
 	l.PushBack(1)
 	l.PushBack(2)
 	l.PushBack(3)
-	l.InsertAfter(1, new(Element[int]))
+
+	checkEqual(t, "非法位置后插入应返回 nil", l.InsertAfter(1, new(Element[int])), (*Element[int])(nil))
+
 	checkList(t, &l, []int{1, 2, 3})
 }
 
