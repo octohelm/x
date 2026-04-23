@@ -13,7 +13,9 @@ import (
 
 // Context 描述一次快照加载或提交的命名与文件位置。
 type Context struct {
-	Name     string
+	// Name 是快照逻辑名，会参与生成默认文件名。
+	Name string
+	// Filename 是快照文件路径；为空时会根据 Name 推导。
 	Filename string
 }
 

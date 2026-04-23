@@ -147,6 +147,7 @@ type Valuer interface {
 
 	fmt.Stringer
 
+	// Value 返回对应的原生 Go 值表示。
 	Value() any
 }
 

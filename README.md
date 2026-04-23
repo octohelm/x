@@ -1,45 +1,40 @@
 # x
 
-[![GoDoc Widget](https://godoc.org/github.com/octohelm/x?status.svg)](https://godoc.org/github.com/octohelm/x)
+`x` 是一个 Go 公共库集合，提供可复用的基础能力与测试辅助组件。
 
-`x` 是一个面向 Go 的增强标准库集合，围绕“补 Go 标准库之间的组合空缺”组织了一组可按需引入的公共包。
+## 职责与边界
 
-仓库按包目录直接组织，适合按需引入单个能力，而不是作为一个需要整体初始化的框架。
+- 以库代码为主，面向复用，不在 root 承载业务项目入口
+- 根目录负责聚合仓库级控制面与工具链入口
+- 具体执行命令收敛到 `justfile` 和 `tool/` 下的对应工具链目录
 
-## 内容总览
+## 目录索引
 
-### 基础能力
+- `anyjson`：动态 JSON 值表示，以及 diff、merge、transform 等操作
+- `cmp`：可组合断言谓词与结构化错误
+- `container/list`：泛型双向链表实现
+- `context`：类型化上下文槽位和值注入辅助
+- `datauri`：data URI 的解析、编码与文本序列化
+- `encoding`：围绕 `encoding.TextMarshaler` / `encoding.TextUnmarshaler` 的通用文本编解码辅助
+- `iter`：标准库 `iter` 的轻量辅助封装
+- `logr`：轻量日志抽象、上下文注入和日志级别辅助
+- `logr/slog`：`logr` 与标准库 `log/slog` 的适配
+- `ptr`：基础值到指针的便捷转换
+- `reflect`：零值判断、类型名称和结构标签等反射辅助
+- `slices`：切片相关的轻量泛型辅助函数
+- `sync`：对标准库 `sync` 的泛型补充封装
+- `sync/singleflight`：按键去重的并发调用抑制
+- `testing`：旧版测试断言入口，已弃用，建议改用 `testing/v2`
+- `testing/bdd`：旧版 BDD 测试辅助，已弃用，建议改用 `testing/v2`
+- `testing/lines`：按行表示文本和生成行级 diff 的辅助
+- `testing/snapshot`：基于 `txtar` 的测试快照装载、比较和更新
+- `testing/v2`：当前推荐的测试断言 API
+- `types`：桥接 `reflect.Type` 与 `go/types.Type` 的统一类型抽象
+- `tool/go`：Go 工具链执行入口
+- `.github/workflows`：仓库 CI 配置
 
-- [`cmp`](cmp)：通用比较谓词与测试中可复用的条件判断
-- [`container/list`](container/list)：泛型链表
-- [`context`](context)：带类型辅助的上下文取值封装
-- [`datauri`](datauri)：`data:` URI 的编解码
-- [`iter`](iter)：轻量迭代辅助
-- [`reflect`](reflect)：反射补充工具
-- [`slices`](slices)：切片辅助函数
-- [`sync`](sync)：泛型并发容器与并发辅助
-- [`sync/singleflight`](sync/singleflight)：单飞控制扩展
+## 继续阅读
 
-### 类型与编码
-
-- [`anyjson`](anyjson)：JSON value、patch、merge、diff 等相关能力
-- [`encoding`](encoding)：文本编解码辅助
-- [`types`](types)：`reflect.Type` 与 `go/types.Type` 之间的统一抽象与转换
-
-### 日志
-
-- [`logr`](logr)：仓库内统一日志接口
-- [`logr/slog`](logr/slog)：基于标准库 `log/slog` 的适配实现
-
-### 测试
-
-- [`testing`](testing)：兼容旧用法的测试辅助入口
-- [`testing/v2`](testing/v2)：当前推荐使用的测试断言入口
-- [`testing/lines`](testing/lines)：文本行与 diff 辅助
-- [`testing/snapshot`](testing/snapshot)：快照测试能力
-
-## 相关文档
-
-- [`AGENTS.md`](AGENTS.md)：仓库内协同约束、改动边界与接管条件
-- [`go.mod`](go.mod)：模块定义与当前 Go / 依赖约束
-- [`LICENSE`](LICENSE)：许可信息
+- Go 模块定义见 `go.mod`
+- 仓库级执行入口见 `justfile`
+- 各包的导出能力与用法以源码和 Go doc 为准

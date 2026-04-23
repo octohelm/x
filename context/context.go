@@ -35,8 +35,11 @@ func New[T any](optFns ...OptionFunc[T]) Context[T] {
 
 // Context 表示一个可向 context.Context 注入和读取特定类型值的槽位。
 type Context[T any] interface {
+	// Inject 将 value 写入 ctx，并返回派生后的 context.Context。
 	Inject(ctx context.Context, value T) context.Context
+	// From 从 ctx 中读取值；若不存在且配置了默认值则返回默认值，否则 panic。
 	From(ctx context.Context) T
+	// MayFrom 从 ctx 中尝试读取值，并报告是否存在。
 	MayFrom(ctx context.Context) (T, bool)
 }
 
