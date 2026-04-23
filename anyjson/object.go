@@ -39,6 +39,7 @@ func (v *Object) init() {
 	}
 }
 
+// Value 返回对象对应的原生 Go map 表示。
 func (v *Object) Value() any {
 	m := map[string]any{}
 	for k, e := range v.props {

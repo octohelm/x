@@ -6,7 +6,8 @@ import "sync"
 type Pool[V any] struct {
 	pool sync.Pool
 	once sync.Once
-	New  func() V
+	// New 在池为空时创建新对象。
+	New func() V
 }
 
 func (p *Pool[V]) init() {

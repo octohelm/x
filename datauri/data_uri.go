@@ -64,9 +64,12 @@ func Parse(dataURI string) (*DataURI, error) {
 
 // DataURI 表示一个解析后的 data URI。
 type DataURI struct {
+	// MediaType 是 data URI 中声明的媒体类型，例如 text/plain 或 image/png。
 	MediaType string
-	Params    map[string]string
-	Data      []byte
+	// Params 保存媒体类型后的附加参数，例如 charset。
+	Params map[string]string
+	// Data 是解码后的原始数据体。
+	Data []byte
 }
 
 // IsZero 判断 data URI 是否不含数据体。

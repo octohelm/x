@@ -100,8 +100,11 @@ type GroupValue[K comparable, V any] struct {
 
 // Result 表示一次调用的结果，可用于 DoChan。
 type Result[V any] struct {
-	Val    V
-	Err    error
+	// Val 是 fn 的返回值。
+	Val V
+	// Err 是 fn 的返回错误。
+	Err error
+	// Shared 报告该结果是否被多个调用方共享。
 	Shared bool
 }
 
