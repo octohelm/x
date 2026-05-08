@@ -3,6 +3,12 @@
 // license that can be found in the LICENSE file.
 
 // Package singleflight 提供按键去重的并发调用抑制机制。
+//
+// 常见入口：
+//   - 用 Group.Do(key, fn) 按 key 去重并发调用。
+//   - 用 Group.DoChan(key, fn) 异步执行并返回 channel。
+//   - 用 Group.Forget(key) 清除进行中的 key。
+//   - 有返回值场景用 GroupValue.Do(key, fn)。
 package singleflight // import "github.com/catatsuy/sync/singleflight"
 
 import (
@@ -230,7 +236,3 @@ func (g *GroupValue[K, V]) Forget(key K) {
 	delete(g.m, key)
 	g.mu.Unlock()
 }
-
-// Group2
-// Deprecated use GroupValue instead
-type Group2[K comparable, V any] = GroupValue[K, V]

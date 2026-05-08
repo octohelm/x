@@ -2,11 +2,16 @@
 
 `x` 是一个 Go 公共库集合，提供可复用的基础能力与测试辅助组件。
 
-## 职责与边界
+## 背景
 
-- 以库代码为主，面向复用，不在 root 承载业务项目入口
-- 根目录负责聚合仓库级控制面与工具链入口
-- 具体执行命令收敛到 `justfile` 和 `tool/` 下的对应工具链目录
+将跨项目的通用模块（JSON 处理、断言、日志、泛型工具等）收敛到一处，避免在多个仓库中重复维护。
+
+## 快速开始
+
+```
+just go test  # 运行测试
+just go vet   # 代码检查
+```
 
 ## 目录索引
 
@@ -30,11 +35,15 @@
 - `testing/snapshot`：基于 `txtar` 的测试快照装载、比较和更新
 - `testing/v2`：当前推荐的测试断言 API
 - `types`：桥接 `reflect.Type` 与 `go/types.Type` 的统一类型抽象
-- `tool/go`：Go 工具链执行入口
 - `.github/workflows`：仓库 CI 配置
+
+## 工具链入口
+
+- [`tool/go`](tool/go/)：Go 工具链执行入口（`just go test` / `just go vet` / `just go fmt`）
 
 ## 继续阅读
 
-- Go 模块定义见 `go.mod`
-- 仓库级执行入口见 `justfile`
+- Go 模块定义见 [`go.mod`](go.mod)
+- 仓库级执行入口见 [`justfile`](justfile)
+- API 文档见 [pkg.go.dev](https://pkg.go.dev/github.com/octohelm/x)
 - 各包的导出能力与用法以源码和 Go doc 为准

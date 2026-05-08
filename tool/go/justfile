@@ -14,16 +14,16 @@ vet path='./...' *args:
 [group('fmt')]
 [no-cd]
 fmt path='.':
-    go tool gofumpt -w -l {{ path }}
+    @go tool gofumpt -w -l {{ path }}
 
 # 整理依赖
 [group('env')]
 [no-cd]
 dep:
-    go mod tidy
+    @go mod tidy
 
 # 更新直接依赖（输入：path，可选，默认 `./...`）
 [group('env')]
 [no-cd]
 update path='./...':
-    go get -u {{ path }}
+    @go get -u {{ path }}

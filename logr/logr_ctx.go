@@ -30,7 +30,7 @@ func LoggerFromContext(ctx context.Context) (Logger, bool) {
 
 // LoggerInjectContext 将 Logger 注入上下文。
 //
-// 它与 WithLogger 等价，保留旧命名以兼容现有调用。
+// Deprecated: 使用 WithLogger 替代。它与 WithLogger 等价，保留旧命名以兼容现有调用。
 func LoggerInjectContext(ctx context.Context, logger Logger) context.Context {
 	return context.WithValue(ctx, contextKey{}, logger)
 }
