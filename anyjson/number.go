@@ -3,7 +3,7 @@ package anyjson
 import (
 	"strconv"
 
-	"github.com/go-json-experiment/json"
+	"encoding/json/v2"
 )
 
 // NumberOf 创建一个数字值节点。

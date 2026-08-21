@@ -8,7 +8,7 @@ import (
 	"slices"
 	"testing"
 
-	"github.com/go-json-experiment/json/jsontext"
+	"encoding/json/jsontext"
 
 	"github.com/octohelm/x/cmp"
 	. "github.com/octohelm/x/testing/v2"

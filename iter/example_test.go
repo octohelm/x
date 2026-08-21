@@ -9,7 +9,6 @@ import (
 func ExampleAction() {
 	seq := iterx.Action(func(yield func(*int) bool) error {
 		for _, v := range []int{1, 2, 3} {
-			v := v
 			if !yield(&v) {
 				return nil
 			}

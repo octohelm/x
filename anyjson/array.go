@@ -6,9 +6,9 @@ import (
 	"io"
 	"iter"
 
-	"github.com/go-json-experiment/json"
-	"github.com/go-json-experiment/json/jsontext"
-	jsonv1 "github.com/go-json-experiment/json/v1"
+	"encoding/json/v2"
+	"encoding/json/jsontext"
+	jsonv1 "encoding/json"
 )
 
 // Array 表示 JSON 数组。

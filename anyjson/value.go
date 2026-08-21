@@ -7,9 +7,10 @@ import (
 	"reflect"
 	"sort"
 
-	"github.com/go-json-experiment/json"
-	"github.com/go-json-experiment/json/jsontext"
-	jsonv1 "github.com/go-json-experiment/json/v1"
+	jsonv1 "encoding/json"
+	"encoding/json/jsontext"
+	"encoding/json/v2"
+
 	"golang.org/x/sync/errgroup"
 )
 

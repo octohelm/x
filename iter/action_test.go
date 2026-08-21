@@ -12,7 +12,6 @@ func TestAction(t *testing.T) {
 	t.Run("正常产出多个值", func(t *testing.T) {
 		seq := xiter.Action(func(yield func(*int) bool) error {
 			for _, v := range []int{1, 2, 3} {
-				v := v
 				if !yield(&v) {
 					return nil
 				}
@@ -43,7 +42,6 @@ func TestAction(t *testing.T) {
 
 		seq := xiter.Action(func(yield func(*int) bool) error {
 			for _, v := range []int{1, 2, 3} {
-				v := v
 				calls++
 				if !yield(&v) {
 					return nil

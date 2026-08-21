@@ -3,7 +3,7 @@ package anyjson
 import (
 	"strconv"
 
-	"github.com/go-json-experiment/json"
+	"encoding/json/v2"
 )
 
 // StringOf 创建一个字符串值节点。

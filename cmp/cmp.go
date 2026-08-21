@@ -7,7 +7,7 @@ import (
 	"iter"
 	"reflect"
 
-	"github.com/go-json-experiment/json/jsontext"
+	"encoding/json/jsontext"
 )
 
 // True 返回要求实际值为 true 的谓词。

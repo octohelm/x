@@ -3,7 +3,7 @@ package anyjson_test
 import (
 	"testing"
 
-	"github.com/go-json-experiment/json"
+	"encoding/json/v2"
 	"github.com/octohelm/x/anyjson"
 	. "github.com/octohelm/x/testing/v2"
 )

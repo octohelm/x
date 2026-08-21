@@ -9,10 +9,10 @@ import (
 	"strconv"
 	"sync/atomic"
 
-	jsonv1 "github.com/go-json-experiment/json/v1"
+	jsonv1 "encoding/json"
 
-	"github.com/go-json-experiment/json"
-	"github.com/go-json-experiment/json/jsontext"
+	"encoding/json/jsontext"
+	"encoding/json/v2"
 	"github.com/octohelm/x/container/list"
 )
 
@@ -29,11 +29,11 @@ func (f *field) Set(v Valuer) {
 type Object struct {
 	props     map[string]*list.Element[*field]
 	ll        list.List[*field]
-	initialed uint32
+	initialed atomic.Uint32
 }
 
 func (v *Object) init() {
-	if atomic.SwapUint32(&v.initialed, 1) == 0 {
+	if v.initialed.Swap(1) == 0 {
 		v.props = map[string]*list.Element[*field]{}
 		v.ll.Init()
 	}

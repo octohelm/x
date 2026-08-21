@@ -3,7 +3,7 @@ package cmp
 import (
 	"fmt"
 
-	"github.com/go-json-experiment/json/jsontext"
+	"encoding/json/jsontext"
 )
 
 // ErrCondition 表示条件比较失败。
